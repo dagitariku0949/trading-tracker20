@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 
 const UserManagementTab = () => {
-  const { getUsers, updateUser, deleteUser, resetUserPassword } = useAuth();
+  // Mock functions
+  const getUsers = async () => ({ success: true, data: [] });
+  const updateUser = async () => ({ success: true });
+  const deleteUser = async () => ({ success: true });
+  const resetUserPassword = async () => ({ success: true });
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUserForm, setShowUserForm] = useState(false);

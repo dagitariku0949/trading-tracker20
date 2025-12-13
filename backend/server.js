@@ -4,7 +4,7 @@ const app = express()
 const kiroRoutes = require('./routes/kiro')
 const tradesRoutes = require('./routes/trades')
 const learningRoutes = require('./routes/learning')
-const authRoutes = require('./routes/auth')
+// Auth routes removed
 
 // CORS middleware - Enhanced for development
 app.use((req, res, next) => {
@@ -57,7 +57,7 @@ app.get('/', (req, res) => {
 app.use('/api/kiro', kiroRoutes)
 app.use('/api/trades', tradesRoutes)
 app.use('/api/learning', learningRoutes)
-app.use('/api/auth', authRoutes)
+// Auth routes removed
 
 const port = process.env.PORT || 4000
 app.listen(port, ()=> console.log('Server listening on', port))
