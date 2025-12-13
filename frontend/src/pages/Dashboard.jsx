@@ -14,7 +14,7 @@ import TradeJournal from '../components/TradeJournal'
 import AfterTradeForm from '../components/AfterTradeForm'
 import PositionCalculator from '../components/PositionCalculator'
 import LearningHub from '../components/LearningHubSimple'
-import AdminPanel from '../components/AdminPanel'
+// AdminPanel removed - not needed in dashboard
 
 
 export default function Dashboard(){
