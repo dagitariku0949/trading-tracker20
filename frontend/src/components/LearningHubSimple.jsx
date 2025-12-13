@@ -275,7 +275,7 @@ const LearningHubSimple = ({ onBack }) => {
                 <p>• Total Videos Available: {learningContent.videos.length}</p>
                 <p>• Source: {loading ? 'Loading...' : error ? 'Fallback Data' : 'Live API'}</p>
                 <p>• Last Updated: {new Date().toLocaleTimeString()}</p>
-                <p>• Content Management: Available for authorized users</p>
+                <p>• Admin Panel: Use Ctrl+Alt+dagi.. to add/edit videos</p>
                 {learningContent.videos.length > 0 && (
                   <details className="mt-2">
                     <summary className="cursor-pointer text-blue-300 hover:text-blue-100">
@@ -303,13 +303,14 @@ const LearningHubSimple = ({ onBack }) => {
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📹</div>
                 <h3 className="text-xl font-bold mb-2">No Videos Available</h3>
-                <p className="text-gray-400 mb-4">Contact your administrator to add videos</p>
+                <p className="text-gray-400 mb-4">Use the admin panel to add your first video</p>
                 <div className="bg-yellow-900 border border-yellow-700 p-4 rounded-lg max-w-md mx-auto">
                   <p className="text-yellow-300 text-sm">
                     <strong>How to add videos:</strong><br/>
-                    1. Contact your administrator<br/>
-                    2. Request video upload access<br/>
-                    3. Videos will be added by authorized users
+                    1. Press Ctrl+Alt+dagi..<br/>
+                    2. Enter password: LEAP2024Admin!<br/>
+                    3. Go to "Learning Management" tab<br/>
+                    4. Click "+ Upload Video"
                   </p>
                 </div>
               </div>

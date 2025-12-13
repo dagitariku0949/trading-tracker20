@@ -16,12 +16,14 @@ import TradeJournal from '../components/TradeJournal'
 import AfterTradeForm from '../components/AfterTradeForm'
 import PositionCalculator from '../components/PositionCalculator'
 import LearningHub from '../components/LearningHubSimple'
+import AdminPanel from '../components/AdminPanel'
 
 
 export default function Dashboard(){
   const { user, logout } = useAuth()
   const [currentUser, setCurrentUser] = useState(null)
   const [showLearning, setShowLearning] = useState(false)
+  const [showAdmin, setShowAdmin] = useState(false)
   
   const [activeTab, setActiveTab] = useState('overview')
   const [showImport, setShowImport] = useState(false)
@@ -112,6 +114,68 @@ export default function Dashboard(){
       restoreReminders()
     }
   }, [trades])
+
+  // Hidden admin access - Hold Ctrl+Alt and type "dagi.." anywhere on the page
+  useEffect(() => {
+    let sequence = ''
+    let sequenceTimer = null
+    let ctrlAltPressed = false
+    
+    const handleKeyDown = (e) => {
+      // Check if Ctrl+Alt is being held
+      if (e.ctrlKey && e.altKey) {
+        ctrlAltPressed = true
+        
+        // Capture typed characters while Ctrl+Alt is held
+        if (e.key.length === 1 || e.key === '.') {
+          // Clear previous timer
+          if (sequenceTimer) clearTimeout(sequenceTimer)
+          
+          // Add key to sequence
+          sequence += e.key.toLowerCase()
+          
+          // Keep only last 6 characters (length of "dagi..")
+          if (sequence.length > 6) {
+            sequence = sequence.slice(-6)
+          }
+          
+          // Check if sequence ends with "dagi.."
+          if (sequence.endsWith('dagi..')) {
+            const password = prompt('Enter admin password:')
+            if (password === 'LEAP2024Admin!') {
+              setShowAdmin(true)
+            } else if (password !== null) {
+              alert('Invalid password')
+            }
+            sequence = '' // Reset sequence
+            ctrlAltPressed = false
+          }
+          
+          // Reset sequence after 3 seconds of inactivity
+          sequenceTimer = setTimeout(() => {
+            sequence = ''
+          }, 3000)
+        }
+      }
+    }
+    
+    const handleKeyUp = (e) => {
+      // Reset when Ctrl or Alt is released
+      if (!e.ctrlKey || !e.altKey) {
+        ctrlAltPressed = false
+        sequence = ''
+        if (sequenceTimer) clearTimeout(sequenceTimer)
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+      if (sequenceTimer) clearTimeout(sequenceTimer)
+    }
+  }, [])
 
 
 
@@ -208,6 +272,15 @@ export default function Dashboard(){
   }
 
 
+
+  if (showAdmin) {
+    return (
+      <AdminPanel 
+        onBackToDashboard={() => setShowAdmin(false)}
+        onLogout={handleUserLogout}
+      />
+    )
+  }
 
   if (showLearning) {
     console.log('RENDERING LEARNING HUB - showLearning is true');
