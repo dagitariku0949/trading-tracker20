@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import api from '../api/client'
 import ConfluenceCard from '../components/ConfluenceCard'
 import CalendarHeatmap from '../components/CalendarHeatmap'
 import MetricsGrid from '../components/MetricsGrid'
