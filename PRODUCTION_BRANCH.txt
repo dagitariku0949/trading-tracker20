@@ -1,0 +1,11 @@
+PRODUCTION BRANCH - NO LOGIN SYSTEM
+===================================
+
+This branch has:
+- No login system
+- No authentication
+- Direct access to dashboard
+- AdminPanel import removed from Dashboard
+- All auth files deleted
+
+Deploy this branch to production.
