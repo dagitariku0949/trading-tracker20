@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚀 Instant Access - Trading Dashboard</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f172a, #1e40af, #0f172a);
+            color: white; 
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: rgba(15, 23, 42, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+        }
+        h1 { 
+            text-align: center; 
+            color: #60a5fa; 
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        .access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .access-card { 
+            background: linear-gradient(135deg, #1e293b, #334155);
+            padding: 25px; 
+            border-radius: 15px; 
+            border: 2px solid #475569;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .access-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3);
+        }
+        .access-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+        }
+        .card-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #f1f5f9;
+        }
+        .card-description {
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        button { 
+            width: 100%;
+            padding: 15px 25px; 
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover { 
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+        .success-btn { 
+            background: linear-gradient(135deg, #059669, #047857) !important;
+        }
+        .success-btn:hover { 
+            background: linear-gradient(135deg, #047857, #065f46) !important;
+        }
+        .warning-btn {
+            background: linear-gradient(135deg, #d97706, #b45309) !important;
+        }
+        .warning-btn:hover {
+            background: linear-gradient(135deg, #b45309, #92400e) !important;
+        }
+        .status {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+        }
+        .emoji { font-size: 2em; margin-right: 15px; }
+        .small-emoji { font-size: 1.2em; margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">🚀</span>Instant Access</h1>
+        <p class="subtitle">Multiple ways to access your Trading Dashboard</p>
+        
+        <div class="status">
+            <h3><span class="small-emoji">ℹ️</span>Choose Your Access Method</h3>
+            <p>All methods below will get you into the dashboard immediately</p>
+        </div>
+
+        <div class="access-grid">
+            <div class="access-card">
+                <div class="card-title"><span class="small-emoji">⚡</span>Auto-Login Dashboard</div>
+                <div class="card-description">
+                    Automatically logs you in and takes you to the main dashboard. 
+                    No manual login required - instant access!
+                </div>
+                <button onclick="goToAutoLogin()" class="success-btn">
+                    🚀 Auto-Login Dashboard
+                </button>
+            </div>
+
+            <div class="access-card">
+                <div class="card-title"><span class="small-emoji">🔧</span>Auto-Login Admin Panel</div>
+                <div class="card-description">
+                    Automatically logs you in and takes you directly to the admin panel. 
+                    Full admin access with all management features.
+                </div>
+                <button onclick="goToAutoAdmin()" class="success-btn">
+                    🔧 Auto-Login Admin
+                </button>
+            </div>
+
+            <div class="access-card">
+                <div class="card-title"><span class="small-emoji">🎯</span>Direct Dashboard</div>
+                <div class="card-description">
+                    Bypass all authentication and go directly to the dashboard. 
+                    No login process at all - pure demo mode.
+                </div>
+                <button onclick="goToDemo()">
+                    🎯 Direct Dashboard
+                </button>
+            </div>
+
+            <div class="access-card">
+                <div class="card-title"><span class="small-emoji">⚙️</span>Direct Admin Panel</div>
+                <div class="card-description">
+                    Bypass authentication and go directly to admin panel. 
+                    Immediate access to all admin features.
+                </div>
+                <button onclick="goToDemoAdmin()">
+                    ⚙️ Direct Admin
+                </button>
+            </div>
+
+            <div class="access-card">
+                <div class="card-title"><span class="small-emoji">🔐</span>Enhanced Login Page</div>
+                <div class="card-description">
+                    Go to the main login page with debug tools and auto-fill buttons. 
+                    Multiple login options available.
+                </div>
+                <button onclick="goToLogin()" class="warning-btn">
+                    🔐 Enhanced Login
+                </button>
+            </div>
+
+            <div class="access-card">
+                <div class="card-title"><span class="small-emoji">🚨</span>Emergency Test</div>
+                <div class="card-description">
+                    Emergency login test page with manual authentication tools. 
+                    For troubleshooting and testing purposes.
+                </div>
+                <button onclick="goToEmergency()" class="warning-btn">
+                    🚨 Emergency Test
+                </button>
+            </div>
+        </div>
+
+        <div class="status">
+            <h3><span class="small-emoji">💡</span>Recommended</h3>
+            <p>Try <strong>"Auto-Login Dashboard"</strong> first - it's the most reliable method!</p>
+        </div>
+    </div>
+
+    <script>
+        function goToAutoLogin() {
+            console.log('🚀 Redirecting to auto-login dashboard...');
+            window.location.href = '/#/auto';
+        }
+
+        function goToAutoAdmin() {
+            console.log('🔧 Redirecting to auto-login admin...');
+            window.location.href = '/#/auto-admin';
+        }
+
+        function goToDemo() {
+            console.log('🎯 Redirecting to direct dashboard...');
+            window.location.href = '/#/demo';
+        }
+
+        function goToDemoAdmin() {
+            console.log('⚙️ Redirecting to direct admin...');
+            window.location.href = '/#/demo-admin';
+        }
+
+        function goToLogin() {
+            console.log('🔐 Redirecting to enhanced login...');
+            window.location.href = '/#/login';
+        }
+
+        function goToEmergency() {
+            console.log('🚨 Redirecting to emergency test...');
+            window.location.href = '/emergency-login-test.html';
+        }
+
+        // Auto-run on page load
+        window.onload = function() {
+            console.log('🚀 Instant Access page loaded');
+            console.log('Available routes:');
+            console.log('- Auto-login: /#/auto');
+            console.log('- Auto-admin: /#/auto-admin');
+            console.log('- Direct demo: /#/demo');
+            console.log('- Direct admin: /#/demo-admin');
+        };
+    </script>
+</body>
+</html>

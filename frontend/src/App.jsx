@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import AutoLogin from './components/AutoLogin'
 import { LearningProvider } from './contexts/LearningContext'
 import { AuthProvider } from './contexts/AuthContext'
 
@@ -43,6 +44,22 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            
+            {/* AUTO-LOGIN ROUTES - Automatically logs you in */}
+            <Route path="/auto" element={
+              <AutoLogin>
+                <Dashboard />
+              </AutoLogin>
+            } />
+            <Route path="/auto-admin" element={
+              <AutoLogin>
+                <AdminPage />
+              </AutoLogin>
+            } />
+            
+            {/* BYPASS ROUTES - Direct access without authentication */}
+            <Route path="/demo" element={<Dashboard />} />
+            <Route path="/demo-admin" element={<AdminPage />} />
             
             {/* Protected Routes */}
             <Route path="/dashboard" element={
