@@ -109,49 +109,27 @@ export const AuthProvider = ({ children }) => {
         }
       };
 
-      console.log('🔐 Available mock users:', Object.keys(mockUsers));
-      console.log('🔐 Checking email:', email.toLowerCase());
-      console.log('🔐 Checking password:', password);
-
-      // Check mock credentials (accept 'password' or any password for demo)
-      if (mockUsers[email.toLowerCase()]) {
-        const user = mockUsers[email.toLowerCase()];
-        const mockToken = `mock-token-${user.id}-${Date.now()}`;
+      // Always succeed for any email/password combination
+      if (email && password) {
+        const user = {
+          id: 1,
+          name: 'User',
+          email: email,
+          role: 'user'
+        };
         
+        const mockToken = `mock-token-${Date.now()}`;
         localStorage.setItem('authToken', mockToken);
         localStorage.setItem('userData', JSON.stringify(user));
         localStorage.setItem('loginTime', new Date().toISOString());
         setUser(user);
         
-        console.log('✅ Mock login successful:', user);
         setLoading(false);
         return { success: true, user };
       }
 
-      // If email not in mock users, still try with common passwords
-      if (password === 'password' || password === '123456' || password === 'admin') {
-        const genericUser = {
-          id: 999,
-          name: 'Generic User',
-          email: email,
-          role: 'user'
-        };
-        
-        const mockToken = `mock-token-generic-${Date.now()}`;
-        localStorage.setItem('authToken', mockToken);
-        localStorage.setItem('userData', JSON.stringify(genericUser));
-        localStorage.setItem('loginTime', new Date().toISOString());
-        setUser(genericUser);
-        
-        console.log('✅ Generic mock login successful:', genericUser);
-        setLoading(false);
-        return { success: true, user: genericUser };
-      }
-
-      console.log('❌ Mock login failed - invalid credentials');
-      setError('Invalid email or password. Try: dagitariku095@gmail.com / password');
       setLoading(false);
-      return { success: false, message: 'Invalid email or password. Try: dagitariku095@gmail.com / password' };
+      return { success: false, message: 'Please enter email and password' };
       
     } catch (error) {
       console.error('❌ Login error:', error);
