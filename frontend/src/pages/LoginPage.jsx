@@ -39,12 +39,15 @@ const LoginPage = () => {
     try {
       if (isLogin) {
         // Login
+        console.log('🔐 Attempting login with:', formData.email);
         const result = await login(formData.email, formData.password);
+        console.log('🔐 Login result:', result);
+        
         if (result.success) {
           setMessage({ type: 'success', text: 'Login successful! Redirecting...' });
           setTimeout(() => navigate(from, { replace: true }), 1000);
         } else {
-          setMessage({ type: 'error', text: result.message });
+          setMessage({ type: 'error', text: result.message || 'Login failed. Please try again.' });
         }
       } else {
         // Register
@@ -236,9 +239,44 @@ const LoginPage = () => {
         <div className="mt-6 bg-yellow-900 border border-yellow-700 rounded-lg p-4">
           <h3 className="text-yellow-300 font-bold mb-2">🔑 Demo Credentials</h3>
           <div className="text-yellow-200 text-sm space-y-1">
-            <p><strong>Demo Account:</strong></p>
-            <p>Email: demo@tradingdashboard.com</p>
+            <p><strong>User Account:</strong></p>
+            <p>Email: dagitariku095@gmail.com</p>
             <p>Password: password</p>
+            <p className="mt-2"><strong>Admin Account:</strong></p>
+            <p>Email: admin@tradingdashboard.com</p>
+            <p>Password: password</p>
+          </div>
+          <div className="mt-3 space-y-2">
+            <button
+              onClick={() => {
+                setFormData({
+                  ...formData,
+                  email: 'dagitariku095@gmail.com',
+                  password: 'password'
+                });
+              }}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded text-sm"
+            >
+              🚀 Auto-fill Demo Credentials
+            </button>
+            <button
+              onClick={async () => {
+                setIsLoading(true);
+                console.log('🔥 Direct login bypass test');
+                const result = await login('dagitariku095@gmail.com', 'password');
+                console.log('🔥 Direct login result:', result);
+                if (result.success) {
+                  setMessage({ type: 'success', text: 'Direct login successful! Redirecting...' });
+                  setTimeout(() => navigate(from, { replace: true }), 1000);
+                } else {
+                  setMessage({ type: 'error', text: 'Direct login failed: ' + result.message });
+                }
+                setIsLoading(false);
+              }}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded text-sm"
+            >
+              🔥 Direct Login Test (Bypass Form)
+            </button>
           </div>
         </div>
       </div>
