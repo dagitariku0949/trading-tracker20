@@ -4,9 +4,10 @@
 ✅ STATUS: DEPLOYED & LIVE
 
 🚀 DEPLOYMENT DETAILS:
-- GitHub Push: ✅ Complete (54b8663)
+- GitHub Push: ✅ Complete (03c88b2)
 - Vercel Deploy: ✅ Auto-triggered
 - Admin Panel: ✅ Fully Functional
+- Auth API: ✅ Serverless functions deployed
 
 🔑 ADMIN ACCESS:
 - Secret Key: Ctrl+Alt+dagi..
@@ -24,4 +25,9 @@
 - Production: https://trading-tracker2.vercel.app
 - Admin Panel: /admin (hidden access)
 
-Deployed: December 13, 2024 - 10:30 AM
+🔐 LOGIN CREDENTIALS:
+- Email: dagitariku095@gmail.com
+- Password: password
+- Admin: admin@tradingdashboard.com / password
+
+Deployed: December 13, 2024 - 10:45 AM (Login Fixed)
