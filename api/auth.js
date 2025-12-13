@@ -41,40 +41,49 @@ export default async function handler(req, res) {
     return res.status(200).end()
   }
 
-  const { method, body, query } = req
-  const path = query.path || []
+  const { method, body, query, url } = req
+  
+  // Parse the path from URL
+  const urlPath = url.split('/api/auth/')[1] || ''
+  const pathParts = urlPath.split('/').filter(Boolean)
+  const action = pathParts[0] || query.path
 
   try {
     // Route handling
-    if (method === 'POST' && path[0] === 'login') {
+    if (method === 'POST' && action === 'login') {
       return handleLogin(req, res)
     }
     
-    if (method === 'POST' && path[0] === 'register') {
+    if (method === 'POST' && action === 'register') {
       return handleRegister(req, res)
     }
     
-    if (method === 'POST' && path[0] === 'forgot-password') {
+    if (method === 'POST' && action === 'forgot-password') {
       return handleForgotPassword(req, res)
     }
     
-    if (method === 'POST' && path[0] === 'reset-password') {
+    if (method === 'POST' && action === 'reset-password') {
       return handleResetPassword(req, res)
     }
     
-    if (method === 'GET' && path[0] === 'verify') {
+    if (method === 'GET' && action === 'verify') {
       return handleVerifyToken(req, res)
     }
     
-    if (method === 'GET' && path[0] === 'profile') {
+    if (method === 'GET' && action === 'profile') {
       return handleGetProfile(req, res)
     }
     
-    if (method === 'PUT' && path[0] === 'profile') {
+    if (method === 'PUT' && action === 'profile') {
       return handleUpdateProfile(req, res)
     }
 
-    return res.status(404).json({ success: false, message: 'Endpoint not found' })
+    // Default response for debugging
+    return res.json({ 
+      success: false, 
+      message: 'Auth API is working', 
+      debug: { method, action, url: req.url, available: ['login', 'register', 'verify', 'profile'] }
+    })
   } catch (error) {
     console.error('Auth API Error:', error)
     return res.status(500).json({ success: false, message: 'Internal server error' })

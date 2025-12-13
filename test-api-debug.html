@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .test-section { margin: 20px 0; padding: 15px; background: #2a2a2a; border-radius: 8px; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #333; border-radius: 4px; white-space: pre-wrap; }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🔧 API Debug Test - Trading Dashboard</h1>
+    
+    <div class="test-section">
+        <h3>1. Test API Base URL</h3>
+        <button onclick="testBaseURL()">Test Base URL</button>
+        <div id="baseUrlResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Auth API</h3>
+        <button onclick="testAuthAPI()">Test Auth Endpoint</button>
+        <div id="authResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test Login</h3>
+        <button onclick="testLogin()">Test Login (dagitariku095@gmail.com)</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Test Trades API</h3>
+        <button onclick="testTradesAPI()">Test Trades Endpoint</button>
+        <div id="tradesResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        function log(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${isError ? 'error' : 'success'}`;
+        }
+
+        async function testBaseURL() {
+            try {
+                log('baseUrlResult', `Testing: ${API_BASE}\nLoading...`);
+                
+                const response = await fetch(`${API_BASE}/`);
+                const data = await response.text();
+                
+                log('baseUrlResult', `✅ Base URL works!\nStatus: ${response.status}\nResponse: ${data}`);
+            } catch (error) {
+                log('baseUrlResult', `❌ Base URL failed!\nError: ${error.message}`, true);
+            }
+        }
+
+        async function testAuthAPI() {
+            try {
+                log('authResult', `Testing: ${API_BASE}/api/auth/verify\nLoading...`);
+                
+                const response = await fetch(`${API_BASE}/api/auth/verify`);
+                const data = await response.json();
+                
+                log('authResult', `✅ Auth API accessible!\nStatus: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                log('authResult', `❌ Auth API failed!\nError: ${error.message}`, true);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                log('loginResult', `Testing login...\nEmail: dagitariku095@gmail.com\nPassword: password`);
+                
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'dagitariku095@gmail.com',
+                        password: 'password'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('loginResult', `✅ Login successful!\nUser: ${data.data.user.name}\nEmail: ${data.data.user.email}\nRole: ${data.data.user.role}\nToken: ${data.data.token.substring(0, 20)}...`);
+                } else {
+                    log('loginResult', `❌ Login failed!\nMessage: ${data.message}`, true);
+                }
+            } catch (error) {
+                log('loginResult', `❌ Login request failed!\nError: ${error.message}`, true);
+            }
+        }
+
+        async function testTradesAPI() {
+            try {
+                log('tradesResult', `Testing: ${API_BASE}/api/trades\nLoading...`);
+                
+                const response = await fetch(`${API_BASE}/api/trades`);
+                const data = await response.json();
+                
+                log('tradesResult', `✅ Trades API works!\nStatus: ${response.status}\nTrades count: ${Array.isArray(data) ? data.length : 'N/A'}\nResponse: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                log('tradesResult', `❌ Trades API failed!\nError: ${error.message}`, true);
+            }
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            console.log('🔧 API Debug Test loaded');
+            console.log('API Base URL:', API_BASE);
+        };
+    </script>
+</body>
+</html>
