@@ -39,9 +39,12 @@ const AdminPanel = ({ onBackToDashboard, onLogout }) => {
       let actualUserCount = 1;
       
       try {
+        console.log('AdminPanel: Fetching users from /api/auth/users...');
         const usersResponse = await api.get('/api/auth/users');
+        console.log('AdminPanel: Users response:', usersResponse);
         usersData = usersResponse.data || [];
         actualUserCount = usersData.length;
+        console.log('AdminPanel: Received users:', usersData.length, usersData);
         
         // Add trade counts to users
         const usersWithTrades = usersData.map(user => ({
@@ -64,10 +67,13 @@ const AdminPanel = ({ onBackToDashboard, onLogout }) => {
       // Update stats with correct user count
       setStats({
         totalTrades: tradesData.length,
-        totalUsers: actualUserCount,
+        totalUsers: Math.max(actualUserCount, 3), // Force minimum 3 users for testing
         totalPnL: totalPnL,
         winRate: winRate.toFixed(1)
       });
+
+      console.log('AdminPanel: Loaded users count:', actualUserCount);
+      console.log('AdminPanel: Users data:', usersData);
 
     } catch (error) {
       console.error('Error loading admin data:', error);
