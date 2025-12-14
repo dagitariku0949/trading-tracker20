@@ -1,0 +1,40 @@
+[build]
+  base = "frontend"
+  publish = "frontend/dist"
+  command = "npm install && npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/admin-panel"
+  to = "/admin-panel.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/learning-test"
+  to = "/learning-test.html"
+  status = 200
+
+[[redirects]]
+  from = "/api-test"
+  to = "/api-test.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[functions]
+  directory = "netlify/functions"
