@@ -2,6 +2,7 @@
 
 // In-memory storage for demonstration (in production, use a real database)
 let globalUsersData = {};
+let passwordResetTokens = {};
 
 // Helper functions
 const hashPassword = (password) => {
@@ -40,6 +41,10 @@ const generateToken = (userId) => {
     exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
   };
   return btoa(JSON.stringify(payload));
+};
+
+const generateResetToken = () => {
+  return Math.random().toString(36).substr(2, 15) + Date.now().toString(36);
 };
 
 const validateToken = (token) => {
@@ -190,6 +195,81 @@ export default async function handler(req, res) {
       return res.json(users);
     }
     
+    // POST /api/auth/forgot-password - Request password reset
+    if (method === 'POST' && url.includes('/forgot-password')) {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+      
+      // Find user by email
+      const user = Object.values(globalUsersData).find(u => u.email === email.toLowerCase().trim());
+      if (!user) {
+        // Don't reveal if email exists or not for security
+        return res.json({ 
+          success: true, 
+          message: 'If an account with that email exists, a password reset link has been sent.' 
+        });
+      }
+      
+      // Generate reset token
+      const resetToken = generateResetToken();
+      passwordResetTokens[resetToken] = {
+        userId: user.id,
+        email: user.email,
+        expires: Date.now() + (60 * 60 * 1000) // 1 hour
+      };
+      
+      // In a real app, you would send an email here
+      // For demo purposes, we'll return the token (don't do this in production!)
+      console.log(`Password reset token for ${email}: ${resetToken}`);
+      
+      return res.json({ 
+        success: true, 
+        message: 'If an account with that email exists, a password reset link has been sent.',
+        // For demo only - remove in production
+        resetToken: resetToken
+      });
+    }
+    
+    // POST /api/auth/reset-password - Reset password with token
+    if (method === 'POST' && url.includes('/reset-password')) {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({ error: 'Token and new password are required' });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      }
+      
+      // Check if token exists and is valid
+      const resetData = passwordResetTokens[token];
+      if (!resetData || resetData.expires < Date.now()) {
+        return res.status(400).json({ error: 'Invalid or expired reset token' });
+      }
+      
+      // Find user
+      const user = globalUsersData[resetData.userId];
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // Update password
+      user.password = hashPassword(newPassword);
+      globalUsersData[user.id] = user;
+      
+      // Remove used token
+      delete passwordResetTokens[token];
+      
+      return res.json({ 
+        success: true, 
+        message: 'Password has been reset successfully. You can now log in with your new password.' 
+      });
+    }
+
     // POST /api/auth/logout - Logout (client-side token removal)
     if (method === 'POST' && url.includes('/logout')) {
       return res.json({ success: true, message: 'Logout successful' });

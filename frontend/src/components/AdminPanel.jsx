@@ -34,32 +34,40 @@ const AdminPanel = ({ onBackToDashboard, onLogout }) => {
       const winningTrades = tradesData.filter(trade => (trade.pnl || 0) > 0).length;
       const winRate = tradesData.length > 0 ? (winningTrades / tradesData.length) * 100 : 0;
 
-      setStats({
-        totalTrades: tradesData.length,
-        totalUsers: 1, // Mock data
-        totalPnL: totalPnL,
-        winRate: winRate.toFixed(1)
-      });
-
-      // Load real users data
+      // Load real users data first
+      let usersData = [];
+      let actualUserCount = 1;
+      
       try {
         const usersResponse = await api.get('/api/auth/users');
-        const usersData = usersResponse.data || [];
+        usersData = usersResponse.data || [];
+        actualUserCount = usersData.length;
         
         // Add trade counts to users
         const usersWithTrades = usersData.map(user => ({
           ...user,
-          trades: tradesData.filter(trade => trade.user_id === user.id).length
+          trades: tradesData.filter(trade => trade.user_id === user.id).length,
+          status: user.status || 'Active'
         }));
         
         setUsers(usersWithTrades);
       } catch (error) {
         console.error('Error loading users:', error);
         // Fallback to mock data
-        setUsers([
-          { id: 1, name: 'Demo User', email: 'demo@example.com', status: 'Active', trades: tradesData.length }
-        ]);
+        usersData = [
+          { id: 'demo_user_2024', name: 'Demo User', email: 'demo@leap.com', status: 'Active', trades: tradesData.length }
+        ];
+        setUsers(usersData);
+        actualUserCount = usersData.length;
       }
+
+      // Update stats with correct user count
+      setStats({
+        totalTrades: tradesData.length,
+        totalUsers: actualUserCount,
+        totalPnL: totalPnL,
+        winRate: winRate.toFixed(1)
+      });
 
     } catch (error) {
       console.error('Error loading admin data:', error);
