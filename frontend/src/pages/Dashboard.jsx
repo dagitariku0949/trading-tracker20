@@ -15,7 +15,8 @@ import TradeJournal from '../components/TradeJournal'
 import AfterTradeForm from '../components/AfterTradeForm'
 import PositionCalculator from '../components/PositionCalculator'
 import LearningHub from '../components/LearningHubSimple'
-// import AdminPanel from '../components/AdminPanel' // Removed for now
+import AdminPanel from '../components/AdminPanel'
+import AdminLogin from '../components/AdminLogin'
 
 
 export default function Dashboard(){
@@ -25,6 +26,8 @@ export default function Dashboard(){
   const [currentUser, setCurrentUser] = useState(null)
   const [showLearning, setShowLearning] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
+  const [showAdminLogin, setShowAdminLogin] = useState(false)
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
   
   const [activeTab, setActiveTab] = useState('overview')
   const [showImport, setShowImport] = useState(false)
@@ -116,7 +119,25 @@ export default function Dashboard(){
     }
   }, [trades])
 
-  // Hidden admin access - Hold Ctrl+Alt and type "dagi.." anywhere on the page
+  // Check admin authentication on load
+  useEffect(() => {
+    const authToken = sessionStorage.getItem('adminAuthToken')
+    const authTime = sessionStorage.getItem('adminAuthTime')
+    
+    if (authToken && authTime) {
+      const timeDiff = Date.now() - parseInt(authTime)
+      // Session expires after 2 hours
+      if (timeDiff < 2 * 60 * 60 * 1000) {
+        setIsAdminAuthenticated(true)
+      } else {
+        // Clear expired session
+        sessionStorage.removeItem('adminAuthToken')
+        sessionStorage.removeItem('adminAuthTime')
+      }
+    }
+  }, [])
+
+  // Hidden admin access - Hold Ctrl+Alt and type "admin" anywhere on the page
   useEffect(() => {
     let sequence = ''
     let sequenceTimer = null
@@ -128,26 +149,21 @@ export default function Dashboard(){
         ctrlAltPressed = true
         
         // Capture typed characters while Ctrl+Alt is held
-        if (e.key.length === 1 || e.key === '.') {
+        if (e.key.length === 1) {
           // Clear previous timer
           if (sequenceTimer) clearTimeout(sequenceTimer)
           
           // Add key to sequence
           sequence += e.key.toLowerCase()
           
-          // Keep only last 6 characters (length of "dagi..")
-          if (sequence.length > 6) {
-            sequence = sequence.slice(-6)
+          // Keep only last 5 characters (length of "admin")
+          if (sequence.length > 5) {
+            sequence = sequence.slice(-5)
           }
           
-          // Check if sequence ends with "dagi.."
-          if (sequence.endsWith('dagi..')) {
-            const password = prompt('Enter admin password:')
-            if (password === 'LEAP2024Admin!') {
-              setShowAdmin(true)
-            } else if (password !== null) {
-              alert('Invalid password')
-            }
+          // Check if sequence ends with "admin"
+          if (sequence.endsWith('admin')) {
+            setShowAdminLogin(true)
             sequence = '' // Reset sequence
             ctrlAltPressed = false
           }
@@ -177,6 +193,20 @@ export default function Dashboard(){
       if (sequenceTimer) clearTimeout(sequenceTimer)
     }
   }, [])
+
+  const handleAdminLogin = () => {
+    setIsAdminAuthenticated(true)
+    setShowAdminLogin(false)
+    setShowAdmin(true)
+  }
+
+  const handleAdminLogout = () => {
+    sessionStorage.removeItem('adminAuthToken')
+    sessionStorage.removeItem('adminAuthTime')
+    setIsAdminAuthenticated(false)
+    setShowAdmin(false)
+    setShowAdminLogin(false)
+  }
 
 
 
@@ -274,20 +304,21 @@ export default function Dashboard(){
 
 
 
-  if (showAdmin) {
+  if (showAdminLogin) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
-          <p className="text-gray-400 mb-4">Admin functionality coming soon</p>
-          <button
-            onClick={() => setShowAdmin(false)}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
+      <AdminLogin 
+        onLogin={handleAdminLogin}
+        onCancel={() => setShowAdminLogin(false)}
+      />
+    )
+  }
+
+  if (showAdmin && isAdminAuthenticated) {
+    return (
+      <AdminPanel 
+        onBackToDashboard={() => setShowAdmin(false)}
+        onLogout={handleAdminLogout}
+      />
     )
   }
 
@@ -341,8 +372,15 @@ export default function Dashboard(){
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
             </button>
             <button
-              onClick={handleUserLogout}
+              onClick={() => setShowAdminLogin(true)}
               className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold transition"
+              title="Admin Access (or use Ctrl+Alt+admin)"
+            >
+              👑 Admin
+            </button>
+            <button
+              onClick={handleUserLogout}
+              className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg font-semibold transition"
               title="Logout"
             >
               🚪 Logout
