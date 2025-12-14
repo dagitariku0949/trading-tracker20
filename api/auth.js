@@ -1,8 +1,20 @@
 // Serverless function for user authentication and registration
 
-// In-memory storage for demonstration (in production, use a real database)
+// Persistent storage simulation (in production, use a real database)
 let globalUsersData = {};
 let passwordResetTokens = {};
+
+// Simple persistence using global object that survives function calls
+if (typeof global !== 'undefined') {
+  if (!global.persistentUsers) {
+    global.persistentUsers = {};
+  }
+  if (!global.persistentResetTokens) {
+    global.persistentResetTokens = {};
+  }
+  globalUsersData = global.persistentUsers;
+  passwordResetTokens = global.persistentResetTokens;
+}
 
 // Helper functions
 const hashPassword = (password) => {
@@ -10,25 +22,7 @@ const hashPassword = (password) => {
   return btoa(password + 'salt_key_2024');
 };
 
-// Initialize with demo user
-const initializeDemoUser = () => {
-  const demoUserId = 'demo_user_2024';
-  if (!globalUsersData[demoUserId]) {
-    globalUsersData[demoUserId] = {
-      id: demoUserId,
-      name: 'Demo User',
-      email: 'demo@leap.com',
-      password: hashPassword('demo123'),
-      created_at: '2024-01-01T00:00:00.000Z',
-      last_login: new Date().toISOString(),
-      status: 'active',
-      role: 'user'
-    };
-  }
-};
-
-// Initialize demo user on module load
-initializeDemoUser();
+// No demo users - let real registrations persist
 
 const generateUserId = () => {
   return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -110,6 +104,13 @@ export default async function handler(req, res) {
       
       globalUsersData[userId] = newUser;
       
+      // Persist to global object
+      if (typeof global !== 'undefined') {
+        global.persistentUsers = globalUsersData;
+      }
+      
+      console.log('User registered:', newUser.email, 'Total users:', Object.keys(globalUsersData).length);
+      
       // Generate token
       const token = generateToken(userId);
       
@@ -146,6 +147,11 @@ export default async function handler(req, res) {
       // Update last login
       user.last_login = new Date().toISOString();
       globalUsersData[user.id] = user;
+      
+      // Persist to global object
+      if (typeof global !== 'undefined') {
+        global.persistentUsers = globalUsersData;
+      }
       
       // Generate token
       const token = generateToken(user.id);
@@ -187,6 +193,9 @@ export default async function handler(req, res) {
     
     // GET /api/auth/users - Get all users (admin only)
     if (method === 'GET' && url.includes('/users')) {
+      console.log('Getting users. Current users in memory:', Object.keys(globalUsersData).length);
+      console.log('User emails:', Object.values(globalUsersData).map(u => u.email));
+      
       const users = Object.values(globalUsersData).map(user => {
         const { password: _, ...userWithoutPassword } = user;
         return userWithoutPassword;
@@ -267,6 +276,17 @@ export default async function handler(req, res) {
       return res.json({ 
         success: true, 
         message: 'Password has been reset successfully. You can now log in with your new password.' 
+      });
+    }
+
+    // GET /api/auth/debug - Debug endpoint to see current state
+    if (method === 'GET' && url.includes('/debug')) {
+      return res.json({
+        totalUsers: Object.keys(globalUsersData).length,
+        userEmails: Object.values(globalUsersData).map(u => u.email),
+        globalExists: typeof global !== 'undefined',
+        persistentUsersExists: typeof global !== 'undefined' && !!global.persistentUsers,
+        persistentUsersCount: typeof global !== 'undefined' && global.persistentUsers ? Object.keys(global.persistentUsers).length : 0
       });
     }
 
