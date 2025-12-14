@@ -398,26 +398,63 @@ export default function Dashboard({ user, onLogout }){
   }
 
   return (
-      <div className="min-h-screen bg-slate-900 text-white p-4 md:p-8">
+      <div className="min-h-screen bg-slate-900 text-white p-2 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+        <div className="flex flex-col gap-4 mb-6 md:flex-row md:justify-between md:items-center">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="text-xl md:text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
               LEAP
             </div>
-            <div className="h-6 w-px bg-slate-700"></div>
-            <h1 className="text-2xl font-semibold text-slate-300">Trading Dashboard</h1>
+            <div className="h-6 w-px bg-slate-700 hidden md:block"></div>
+            <h1 className="text-lg md:text-2xl font-semibold text-slate-300">Trading Dashboard</h1>
             {currentUser && (
               <>
-                <div className="h-6 w-px bg-slate-700"></div>
-                <div className="text-sm text-slate-400">
+                <div className="h-6 w-px bg-slate-700 hidden md:block"></div>
+                <div className="text-xs md:text-sm text-slate-400">
                   Welcome, {currentUser.name}
                 </div>
               </>
             )}
           </div>
-          <div className="flex gap-3">
+          
+          {/* Mobile Action Buttons */}
+          <div className="flex flex-wrap gap-2 md:hidden">
+            <button
+              onClick={() => {
+                setEditingTrade(null)
+                setShowTradeForm(true)
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700 px-3 py-2 rounded-lg text-sm font-semibold transition flex-1"
+            >
+              + Trade
+            </button>
+            <button
+              onClick={() => setShowLearning(true)}
+              className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-semibold transition relative"
+              title="Learn"
+            >
+              👨‍🏫
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+            </button>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg text-sm font-semibold transition"
+              title="Settings"
+            >
+              ⚙️
+            </button>
+            <button
+              onClick={handleUserLogout}
+              className="bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded-lg text-sm font-semibold transition"
+              title="Logout"
+            >
+              🚪
+            </button>
+          </div>
+
+          {/* Desktop Action Buttons */}
+          <div className="hidden md:flex gap-3">
             <button
               onClick={() => setShowLearning(true)}
               className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-semibold transition relative"
@@ -469,11 +506,30 @@ export default function Dashboard({ user, onLogout }){
           </div>
         </div>
 
+        {/* Mobile Secondary Actions */}
+        <div className="flex gap-2 mb-4 md:hidden">
+          <button
+            onClick={() => setShowImport(true)}
+            className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-semibold transition flex-1"
+          >
+            📥 Import
+          </button>
+          <button
+            onClick={() => {
+              setClosingTrade(null)
+              setShowAfterTradeForm(true)
+            }}
+            className="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-lg text-sm font-semibold transition flex-1"
+          >
+            📊 After Trade
+          </button>
+        </div>
+
         {/* Tab Navigation */}
-        <div className="flex gap-2 mb-6 border-b border-slate-700 overflow-x-auto">
+        <div className="flex gap-1 md:gap-2 mb-6 border-b border-slate-700 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
+            className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-semibold transition whitespace-nowrap ${
               activeTab === 'overview'
                 ? 'border-b-2 border-emerald-500 text-emerald-400'
                 : 'text-slate-400 hover:text-slate-200'
@@ -483,7 +539,7 @@ export default function Dashboard({ user, onLogout }){
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
+            className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-semibold transition whitespace-nowrap ${
               activeTab === 'analytics'
                 ? 'border-b-2 border-emerald-500 text-emerald-400'
                 : 'text-slate-400 hover:text-slate-200'
@@ -496,7 +552,7 @@ export default function Dashboard({ user, onLogout }){
               console.log('Dashboard: Journal button clicked, switching to journal tab');
               setActiveTab('journal');
             }}
-            className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
+            className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-semibold transition whitespace-nowrap ${
               activeTab === 'journal'
                 ? 'border-b-2 border-emerald-500 text-emerald-400 bg-emerald-900/20'
                 : 'text-slate-400 hover:text-slate-200'
@@ -506,33 +562,33 @@ export default function Dashboard({ user, onLogout }){
           </button>
           <button
             onClick={() => setActiveTab('monthly')}
-            className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
+            className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-semibold transition whitespace-nowrap ${
               activeTab === 'monthly'
                 ? 'border-b-2 border-emerald-500 text-emerald-400'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Monthly Calendar
+            📅 Monthly
           </button>
           <button
             onClick={() => setActiveTab('trades')}
-            className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
+            className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-semibold transition whitespace-nowrap ${
               activeTab === 'trades'
                 ? 'border-b-2 border-emerald-500 text-emerald-400'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            All Trades
+            📋 Trades
           </button>
           <button
             onClick={() => setActiveTab('calculator')}
-            className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
+            className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-semibold transition whitespace-nowrap ${
               activeTab === 'calculator'
                 ? 'border-b-2 border-emerald-500 text-emerald-400'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🧮 Calculator
+            🧮 Calc
           </button>
         </div>
 

@@ -45,6 +45,16 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+/* Hide scrollbar for mobile tab navigation */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Landing page animations */
 @keyframes fadeIn {
   from {
