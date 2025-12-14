@@ -21,21 +21,37 @@ const AdminLogin = ({ onLogin, onCancel }) => {
       adminKey: 'LEAP-ADMIN-2024'
     };
 
+    // Debug logging
+    console.log('Login attempt:', {
+      entered: credentials,
+      expected: ADMIN_CREDENTIALS,
+      usernameMatch: credentials.username === ADMIN_CREDENTIALS.username,
+      passwordMatch: credentials.password === ADMIN_CREDENTIALS.password,
+      adminKeyMatch: credentials.adminKey === ADMIN_CREDENTIALS.adminKey
+    });
+
     // Simulate authentication delay
     setTimeout(() => {
       if (
-        credentials.username === ADMIN_CREDENTIALS.username &&
-        credentials.password === ADMIN_CREDENTIALS.password &&
-        credentials.adminKey === ADMIN_CREDENTIALS.adminKey
+        credentials.username.trim() === ADMIN_CREDENTIALS.username &&
+        credentials.password.trim() === ADMIN_CREDENTIALS.password &&
+        credentials.adminKey.trim() === ADMIN_CREDENTIALS.adminKey
       ) {
         // Store admin session
         const authToken = btoa(`${Date.now()}-${Math.random()}-admin`);
         sessionStorage.setItem('adminAuthToken', authToken);
         sessionStorage.setItem('adminAuthTime', Date.now().toString());
         
+        console.log('Admin login successful');
         onLogin();
       } else {
-        setError('Invalid admin credentials. Please check your username, password, and admin key.');
+        console.log('Admin login failed - credential mismatch');
+        setError(`Invalid admin credentials. Please check your username, password, and admin key.
+        
+Debug Info:
+Username: "${credentials.username}" (expected: "${ADMIN_CREDENTIALS.username}")
+Password: "${credentials.password}" (expected: "${ADMIN_CREDENTIALS.password}")
+Admin Key: "${credentials.adminKey}" (expected: "${ADMIN_CREDENTIALS.adminKey}")`);
       }
       setLoading(false);
     }, 1000);
@@ -100,7 +116,20 @@ const AdminLogin = ({ onLogin, onCancel }) => {
           )}
 
           <div className="bg-blue-900 border border-blue-700 p-3 rounded-lg mb-4 text-blue-200 text-sm">
-            <strong>Admin Credentials:</strong><br/>
+            <div className="flex justify-between items-center mb-2">
+              <strong>Admin Credentials:</strong>
+              <button
+                type="button"
+                onClick={() => setCredentials({
+                  username: 'admin',
+                  password: 'TradingAdmin2024!',
+                  adminKey: 'LEAP-ADMIN-2024'
+                })}
+                className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
+              >
+                Auto-Fill
+              </button>
+            </div>
             Username: admin<br/>
             Password: TradingAdmin2024!<br/>
             Admin Key: LEAP-ADMIN-2024
