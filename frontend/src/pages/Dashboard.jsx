@@ -137,7 +137,7 @@ export default function Dashboard(){
     }
   }, [])
 
-  // Hidden admin access - Hold Ctrl+Alt and type "admin" anywhere on the page
+  // Hidden admin access - Hold Ctrl+Alt and type "dagi.." anywhere on the page
   useEffect(() => {
     let sequence = ''
     let sequenceTimer = null
@@ -149,20 +149,20 @@ export default function Dashboard(){
         ctrlAltPressed = true
         
         // Capture typed characters while Ctrl+Alt is held
-        if (e.key.length === 1) {
+        if (e.key.length === 1 || e.key === '.') {
           // Clear previous timer
           if (sequenceTimer) clearTimeout(sequenceTimer)
           
           // Add key to sequence
           sequence += e.key.toLowerCase()
           
-          // Keep only last 5 characters (length of "admin")
-          if (sequence.length > 5) {
-            sequence = sequence.slice(-5)
+          // Keep only last 6 characters (length of "dagi..")
+          if (sequence.length > 6) {
+            sequence = sequence.slice(-6)
           }
           
-          // Check if sequence ends with "admin"
-          if (sequence.endsWith('admin')) {
+          // Check if sequence ends with "dagi.."
+          if (sequence.endsWith('dagi..')) {
             setShowAdminLogin(true)
             sequence = '' // Reset sequence
             ctrlAltPressed = false
@@ -371,13 +371,7 @@ export default function Dashboard(){
               👨‍🏫 Learn
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
             </button>
-            <button
-              onClick={() => setShowAdminLogin(true)}
-              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold transition"
-              title="Admin Access (or use Ctrl+Alt+admin)"
-            >
-              👑 Admin
-            </button>
+
             <button
               onClick={handleUserLogout}
               className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg font-semibold transition"
