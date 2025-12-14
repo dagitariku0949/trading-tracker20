@@ -32,6 +32,12 @@ const saveUsersToStorage = () => {
   }
 };
 
+// Helper functions
+const hashPassword = (password) => {
+  // Simple hash for demo - in production use bcrypt or similar
+  return btoa(password + 'salt_key_2024');
+};
+
 // Initialize storage
 loadUsersFromStorage();
 
@@ -83,14 +89,6 @@ const initializeDemoUsersIfEmpty = () => {
 
 // Initialize demo users to simulate your 3 registered users
 initializeDemoUsersIfEmpty();
-
-// Helper functions
-const hashPassword = (password) => {
-  // Simple hash for demo - in production use bcrypt or similar
-  return btoa(password + 'salt_key_2024');
-};
-
-// No demo users - let real registrations persist
 
 const generateUserId = () => {
   return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
