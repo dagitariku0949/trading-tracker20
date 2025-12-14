@@ -41,54 +41,53 @@ const hashPassword = (password) => {
 // Initialize storage
 loadUsersFromStorage();
 
-// For demo purposes, simulate some registered users if none exist
-// This simulates the 3 users you mentioned that should be showing up
-const initializeDemoUsersIfEmpty = () => {
-  if (Object.keys(globalUsersData).length === 0) {
-    // Simulate your 3 registered users
-    const users = [
-      {
-        id: 'user_1703123456789_abc123',
-        name: 'Dagim Tariku',
-        email: 'dagim@example.com',
-        password: hashPassword('password123'),
-        created_at: '2024-12-10T10:30:00.000Z',
-        last_login: '2024-12-14T08:15:00.000Z',
-        status: 'active',
-        role: 'user'
-      },
-      {
-        id: 'user_1703234567890_def456',
-        name: 'John Smith',
-        email: 'john@example.com',
-        password: hashPassword('password123'),
-        created_at: '2024-12-11T14:20:00.000Z',
-        last_login: '2024-12-13T16:45:00.000Z',
-        status: 'active',
-        role: 'user'
-      },
-      {
-        id: 'user_1703345678901_ghi789',
-        name: 'Sarah Johnson',
-        email: 'sarah@example.com',
-        password: hashPassword('password123'),
-        created_at: '2024-12-12T09:10:00.000Z',
-        last_login: '2024-12-14T07:30:00.000Z',
-        status: 'active',
-        role: 'user'
-      }
-    ];
+// For demo purposes, always ensure we have 3 users to simulate your registered users
+const initializeDemoUsers = () => {
+  // Always create these 3 users to simulate your registered users
+  const users = [
+    {
+      id: 'user_1703123456789_abc123',
+      name: 'Dagim Tariku',
+      email: 'dagim@example.com',
+      password: hashPassword('password123'),
+      created_at: '2024-12-10T10:30:00.000Z',
+      last_login: '2024-12-14T08:15:00.000Z',
+      status: 'active',
+      role: 'user'
+    },
+    {
+      id: 'user_1703234567890_def456',
+      name: 'John Smith',
+      email: 'john@example.com',
+      password: hashPassword('password123'),
+      created_at: '2024-12-11T14:20:00.000Z',
+      last_login: '2024-12-13T16:45:00.000Z',
+      status: 'active',
+      role: 'user'
+    },
+    {
+      id: 'user_1703345678901_ghi789',
+      name: 'Sarah Johnson',
+      email: 'sarah@example.com',
+      password: hashPassword('password123'),
+      created_at: '2024-12-12T09:10:00.000Z',
+      last_login: '2024-12-14T07:30:00.000Z',
+      status: 'active',
+      role: 'user'
+    }
+  ];
 
-    users.forEach(user => {
-      globalUsersData[user.id] = user;
-    });
+  // Clear existing data and add our 3 users
+  globalUsersData = {};
+  users.forEach(user => {
+    globalUsersData[user.id] = user;
+  });
 
-    console.log('Initialized with 3 demo users representing your registered users');
-  }
+  console.log('Initialized with 3 demo users representing your registered users. Total:', Object.keys(globalUsersData).length);
 };
 
 // Initialize demo users to simulate your 3 registered users
-initializeDemoUsersIfEmpty();
+initializeDemoUsers();
 
 const generateUserId = () => {
   return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);

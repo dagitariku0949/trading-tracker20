@@ -67,7 +67,7 @@ const AdminPanel = ({ onBackToDashboard, onLogout }) => {
       // Update stats with correct user count
       setStats({
         totalTrades: tradesData.length,
-        totalUsers: Math.max(actualUserCount, 3), // Force minimum 3 users for testing
+        totalUsers: actualUserCount,
         totalPnL: totalPnL,
         winRate: winRate.toFixed(1)
       });
