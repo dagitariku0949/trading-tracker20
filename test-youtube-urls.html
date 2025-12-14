@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube URL Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        iframe { width: 560px; height: 315px; border: 1px solid #000; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>🧪 YouTube URL Format Test</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: Standard YouTube Embed URL</h3>
+        <p><strong>URL:</strong> https://www.youtube.com/embed/dQw4w9WgXcQ</p>
+        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+        </iframe>
+        <p class="success">✅ This should work (standard embed format)</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: YouTube Watch URL (Should NOT work in iframe)</h3>
+        <p><strong>URL:</strong> https://www.youtube.com/watch?v=dQw4w9WgXcQ</p>
+        <iframe src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+        </iframe>
+        <p class="error">❌ This will show "refused to connect" (wrong format)</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Different Video (Working Embed)</h3>
+        <p><strong>URL:</strong> https://www.youtube.com/embed/jNQXAC9IVRw</p>
+        <iframe src="https://www.youtube.com/embed/jNQXAC9IVRw" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+        </iframe>
+        <p class="success">✅ Different video to test if it's video-specific</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 4: YouTube Nocookie (Alternative)</h3>
+        <p><strong>URL:</strong> https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ</p>
+        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+        </iframe>
+        <p class="success">✅ Privacy-enhanced mode (sometimes works better)</p>
+    </div>
+    
+    <script>
+        console.log('🧪 YouTube URL Test Page Loaded');
+        
+        // Test which iframes load successfully
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach((iframe, index) => {
+            iframe.onload = () => {
+                console.log(`✅ Test ${index + 1} iframe loaded successfully:`, iframe.src);
+            };
+            
+            iframe.onerror = () => {
+                console.log(`❌ Test ${index + 1} iframe failed to load:`, iframe.src);
+            };
+        });
+        
+        // Check for console errors
+        window.addEventListener('error', (e) => {
+            console.error('Page error:', e.error);
+        });
+    </script>
+</body>
+</html>

@@ -1,12 +1,4 @@
-Force deployment trigger - 2024-12-11 - API Sync Fix
-This file is created to force a new deployment and ensure all changes are live.
-Timestamp: 2024-12-11T15:30:00Z
-
-Changes made:
-- Fixed Vercel API routing configuration
-- Updated API base URL to use dynamic origin
-- Added proper serverless function configuration
-- Enhanced debugging for API calls
-- Fixed admin panel sync issues
-
-Expected result: Learning content should load properly and admin changes should sync to main website.
+Force deployment trigger - Remove login system
+Timestamp: 2024-12-12 15:30:00
+Changes: Bypassed all authentication in React app
+Status: Direct access to dashboard enabled

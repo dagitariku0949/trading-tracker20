@@ -1,0 +1,4 @@
+Force deployment trigger for admin route fix
+Timestamp: 2024-12-13 12:20:00
+Changes: Admin panel routing via /admin URL
+Status: Forcing Vercel redeployment

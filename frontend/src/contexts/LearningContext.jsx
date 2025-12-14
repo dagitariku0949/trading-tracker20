@@ -229,10 +229,37 @@ export const LearningProvider = ({ children }) => {
     return published;
   };
 
-  // Admin functions for managing content
+  // Functions for managing content
   const addContent = async (type, content) => {
     try {
-      // Try API first
+      console.log('Adding content:', { type, content });
+      
+      // For file uploads that are already processed, add directly to local state
+      if (content.id && content.video_url && content.video_url.startsWith('/uploads/')) {
+        console.log('Adding uploaded video directly to state');
+        const contentType = type === 'stream' ? 'liveStreams' : `${type}s`;
+        const newContent = {
+          ...content,
+          status: content.status || 'Published',
+          views: content.views || 0,
+          likes: content.likes || 0,
+          upload_date: content.upload_date || new Date().toISOString(),
+          created_at: content.created_at || new Date().toISOString(),
+          updated_at: content.updated_at || new Date().toISOString()
+        };
+
+        const updatedContent = {
+          ...learningContent,
+          [contentType]: [...learningContent[contentType], newContent]
+        };
+        
+        setLearningContent(updatedContent);
+        localStorage.setItem('learningContent', JSON.stringify(updatedContent));
+        console.log('Uploaded video added to state:', newContent);
+        return newContent;
+      }
+      
+      // Try API first for regular content
       try {
         const response = await fetch(`${API_BASE_URL}/api/learning`, {
           method: 'POST',
@@ -259,9 +286,9 @@ export const LearningProvider = ({ children }) => {
         const contentType = type === 'stream' ? 'liveStreams' : `${type}s`;
         const newContent = {
           ...content,
-          id: Date.now(),
+          id: content.id || Date.now(),
           status: content.status || 'Published',
-          createdAt: new Date().toISOString(),
+          createdAt: content.createdAt || new Date().toISOString(),
           students: type === 'course' ? 0 : undefined,
           views: type === 'video' ? 0 : undefined,
           likes: type === 'video' ? 0 : undefined,

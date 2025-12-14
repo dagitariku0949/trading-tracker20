@@ -207,7 +207,7 @@ const LearningHub = ({ onBack }) => {
           </div>
           <div className="text-xs mt-1">
             {(publishedContent && publishedContent.courses && publishedContent.courses.length > 0) 
-              ? 'Admin changes will sync automatically' 
+              ? 'Content updates will sync automatically' 
               : 'Content is temporarily hardcoded while API reconnects'}
           </div>
         </div>

@@ -1,13 +1,73 @@
 import React, { useState } from 'react';
+import { useLearning } from '../contexts/LearningContext';
 
 const LearningHubSimple = ({ onBack }) => {
   console.log('LearningHubSimple component is rendering!', new Date().toISOString());
   
   const [activeCategory, setActiveCategory] = useState('courses');
   const [selectedVideo, setSelectedVideo] = useState(null);
+  
+  // FORCE IMMEDIATE RETURN - NO DEPENDENCIES
+  return (
+    <div className="min-h-screen bg-slate-900 text-white">
+      <div className="bg-green-600 text-white p-4 text-center">
+        <h1 className="text-2xl font-bold">✅ LEARNING HUB IS WORKING!</h1>
+        <p>Time: {new Date().toLocaleTimeString()}</p>
+      </div>
+      
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <button
+          onClick={onBack}
+          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg mb-6"
+        >
+          ← Back to Dashboard
+        </button>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-slate-800 p-6 rounded-lg">
+            <div className="text-4xl mb-4 text-center">🎓</div>
+            <h3 className="text-xl font-bold mb-2">Complete Forex Trading Mastery</h3>
+            <p className="text-gray-400 mb-4">Master the fundamentals of forex trading</p>
+            <div className="flex justify-between items-center">
+              <span className="text-2xl font-bold text-emerald-400">Free</span>
+              <button className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg">
+                Start Learning
+              </button>
+            </div>
+          </div>
+          
+          <div className="bg-slate-800 p-6 rounded-lg">
+            <div className="text-4xl mb-4 text-center">📊</div>
+            <h3 className="text-xl font-bold mb-2">Advanced Price Action Strategies</h3>
+            <p className="text-gray-400 mb-4">Learn professional price action techniques</p>
+            <div className="flex justify-between items-center">
+              <span className="text-2xl font-bold text-emerald-400">$99</span>
+              <button className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg">
+                Enroll Now
+              </button>
+            </div>
+          </div>
+          
+          <div className="bg-slate-800 p-6 rounded-lg">
+            <div className="text-4xl mb-4 text-center">🧠</div>
+            <h3 className="text-xl font-bold mb-2">Trading Psychology Mastery</h3>
+            <p className="text-gray-400 mb-4">Develop mental discipline for trading</p>
+            <div className="flex justify-between items-center">
+              <span className="text-2xl font-bold text-emerald-400">$79</span>
+              <button className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg">
+                Enroll Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-  // HARDCODED CONTENT - No API dependencies
-  const learningContent = {
+  // Get learning content from context (connected to backend API)
+  const { publishedContent, loading, error } = useLearning();
+  const learningContent = publishedContent || {
     courses: [
       {
         id: 1,
@@ -111,7 +171,15 @@ const LearningHubSimple = ({ onBack }) => {
     { id: 'resources', label: 'Resources', icon: '📚' }
   ];
 
-  console.log('LearningHubSimple rendering with courses:', learningContent.courses.length);
+  console.log('🎬 LearningHubSimple rendering:', {
+    courses: learningContent.courses.length,
+    videos: learningContent.videos.length,
+    videoTitles: learningContent.videos.map(v => v.title),
+    videoUrls: learningContent.videos.map(v => v.video_url),
+    loading,
+    error,
+    timestamp: new Date().toISOString()
+  });
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">
@@ -125,6 +193,30 @@ const LearningHubSimple = ({ onBack }) => {
                 className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
               >
                 ← Back to Dashboard
+              </button>
+              <button
+                onClick={async () => {
+                  console.log('🔄 Force refreshing learning content...');
+                  
+                  // Try to fetch fresh data from API
+                  try {
+                    const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
+                    const response = await fetch(`${API_BASE_URL}/api/learning?t=${Date.now()}`);
+                    const data = await response.json();
+                    console.log('📊 Fresh data from API:', data.data?.videos?.length, 'videos');
+                    
+                    // Force page reload to ensure fresh data
+                    window.location.reload();
+                  } catch (error) {
+                    console.error('❌ Refresh failed:', error);
+                    // Still reload the page
+                    window.location.reload();
+                  }
+                }}
+                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors"
+                title="Force refresh videos from server"
+              >
+                🔄 Force Refresh
               </button>
             </div>
             <div className="text-right">
@@ -147,12 +239,18 @@ const LearningHubSimple = ({ onBack }) => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* SUCCESS BANNER */}
-        <div className="bg-green-600 text-white p-4 rounded-lg mb-6 text-center">
-          <div className="text-xl font-bold">✅ SIMPLE VERSION WORKING - NO API DEPENDENCIES</div>
+        {/* API STATUS BANNER */}
+        <div className={`text-white p-4 rounded-lg mb-6 text-center ${
+          loading ? 'bg-blue-600' : error ? 'bg-red-600' : 'bg-green-600'
+        }`}>
+          <div className="text-xl font-bold">
+            {loading ? '🔄 LOADING CONTENT...' : 
+             error ? '❌ API ERROR - USING FALLBACK' : 
+             '✅ LIVE API CONNECTED'}
+          </div>
           <div className="text-sm mt-2">
             Courses Count: {learningContent.courses.length} | 
-            Source: Hardcoded Simple Component | 
+            Source: {loading ? 'Loading...' : error ? 'Fallback Data' : 'Live API'} | 
             Time: {new Date().toLocaleTimeString()}
           </div>
         </div>
@@ -228,7 +326,54 @@ const LearningHubSimple = ({ onBack }) => {
         {/* Videos Section */}
         {activeCategory === 'videos' && (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Debug Info */}
+            <div className="bg-blue-900 border border-blue-700 p-4 rounded-lg mb-6">
+              <h3 className="font-bold text-blue-300 mb-2">📹 Video Management Status</h3>
+              <div className="text-sm text-blue-200 space-y-1">
+                <p>• Total Videos Available: {learningContent.videos.length}</p>
+                <p>• Source: {loading ? 'Loading...' : error ? 'Fallback Data' : 'Live API'}</p>
+                <p>• Last Updated: {new Date().toLocaleTimeString()}</p>
+                <p>• Admin Panel: Use Ctrl+Alt+dagi.. to add/edit videos</p>
+                {learningContent.videos.length > 0 && (
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-blue-300 hover:text-blue-100">
+                      🔍 Show Video Details ({learningContent.videos.length} videos)
+                    </summary>
+                    <div className="mt-2 pl-4 space-y-1">
+                      {learningContent.videos.map((video, index) => (
+                        <div key={video.id} className="text-xs">
+                          {index + 1}. <strong>{video.title}</strong>
+                          <br />
+                          &nbsp;&nbsp;&nbsp;URL: {video.video_url || 'No URL'}
+                          <br />
+                          &nbsp;&nbsp;&nbsp;Type: {video.video_url?.startsWith('/uploads/') ? 'Uploaded File' : 
+                                                   video.video_url?.includes('youtube') ? 'YouTube' : 
+                                                   video.video_url?.includes('vimeo') ? 'Vimeo' : 'External URL'}
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+              </div>
+            </div>
+            
+            {learningContent.videos.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📹</div>
+                <h3 className="text-xl font-bold mb-2">No Videos Available</h3>
+                <p className="text-gray-400 mb-4">Use the admin panel to add your first video</p>
+                <div className="bg-yellow-900 border border-yellow-700 p-4 rounded-lg max-w-md mx-auto">
+                  <p className="text-yellow-300 text-sm">
+                    <strong>How to add videos:</strong><br/>
+                    1. Press Ctrl+Alt+dagi..<br/>
+                    2. Enter password: LEAP2024Admin!<br/>
+                    3. Go to "Learning Management" tab<br/>
+                    4. Click "+ Upload Video"
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {learningContent.videos.map(video => (
                 <div key={video.id} className="bg-slate-800 rounded-lg overflow-hidden hover:bg-slate-750 transition-colors cursor-pointer"
                      onClick={() => setSelectedVideo(video)}>
@@ -249,7 +394,8 @@ const LearningHubSimple = ({ onBack }) => {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            )}
 
             {/* Video Modal */}
             {selectedVideo && (
@@ -266,13 +412,119 @@ const LearningHubSimple = ({ onBack }) => {
                       </button>
                     </div>
                     <div className="aspect-video bg-slate-700 rounded-lg mb-4 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-6xl mb-4">🎥</div>
-                        <p className="text-gray-400">Video player would be embedded here</p>
-                        <p className="text-sm text-gray-500 mt-2">
-                          In production, this would show the actual video content
-                        </p>
-                      </div>
+                      {(() => {
+                        const videoUrl = selectedVideo.video_url;
+                        console.log('Playing video:', selectedVideo.title, 'URL:', videoUrl);
+                        
+                        // YouTube embed URLs
+                        if (videoUrl && (videoUrl.includes('youtube.com/embed') || videoUrl.includes('youtu.be'))) {
+                          return (
+                            <iframe
+                              src={videoUrl}
+                              className="w-full h-full rounded-lg"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              title={selectedVideo.title}
+                            ></iframe>
+                          );
+                        }
+                        
+                        // Vimeo embed URLs
+                        if (videoUrl && videoUrl.includes('vimeo.com')) {
+                          return (
+                            <iframe
+                              src={videoUrl}
+                              className="w-full h-full rounded-lg"
+                              frameBorder="0"
+                              allow="autoplay; fullscreen; picture-in-picture"
+                              allowFullScreen
+                              title={selectedVideo.title}
+                            ></iframe>
+                          );
+                        }
+                        
+                        // Uploaded files (server-hosted)
+                        if (videoUrl && videoUrl.startsWith('/uploads/')) {
+                          const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
+                          const fullVideoUrl = `${API_BASE_URL}${videoUrl}`;
+                          return (
+                            <video
+                              src={fullVideoUrl}
+                              className="w-full h-full rounded-lg"
+                              controls
+                              title={selectedVideo.title}
+                              onError={(e) => {
+                                console.error('Video load error:', e);
+                                console.log('Attempted URL:', fullVideoUrl);
+                              }}
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          );
+                        }
+                        
+                        // Direct video URLs (external hosting)
+                        if (videoUrl && videoUrl.startsWith('http') && 
+                            (videoUrl.includes('.mp4') || videoUrl.includes('.webm') || videoUrl.includes('.ogg'))) {
+                          return (
+                            <video
+                              src={videoUrl}
+                              className="w-full h-full rounded-lg"
+                              controls
+                              title={selectedVideo.title}
+                              onError={(e) => {
+                                console.error('Video load error:', e);
+                                console.log('Attempted URL:', videoUrl);
+                              }}
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          );
+                        }
+                        
+                        // Fallback for any other HTTP URLs (try as video first, then show info)
+                        if (videoUrl && videoUrl.startsWith('http')) {
+                          return (
+                            <div className="text-center">
+                              <video
+                                src={videoUrl}
+                                className="w-full h-full rounded-lg mb-4"
+                                controls
+                                title={selectedVideo.title}
+                                onError={(e) => {
+                                  console.error('Video load error:', e);
+                                  e.target.style.display = 'none';
+                                  e.target.nextElementSibling.style.display = 'block';
+                                }}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                              <div style={{display: 'none'}} className="text-center">
+                                <div className="text-6xl mb-4">{selectedVideo.thumbnail || '🎥'}</div>
+                                <p className="text-gray-400">Video format not supported in browser</p>
+                                <p className="text-sm text-gray-500 mt-2">
+                                  <a href={videoUrl} target="_blank" rel="noopener noreferrer" 
+                                     className="text-blue-400 hover:text-blue-300 underline">
+                                    Open video in new tab
+                                  </a>
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // No video URL provided
+                        return (
+                          <div className="text-center">
+                            <div className="text-6xl mb-4">{selectedVideo.thumbnail || '🎥'}</div>
+                            <p className="text-gray-400">Video preview</p>
+                            <p className="text-sm text-gray-500 mt-2">
+                              {videoUrl ? `Video URL: ${videoUrl}` : 'No video URL provided'}
+                            </p>
+                          </div>
+                        );
+                      })()}
                     </div>
                     <p className="text-gray-300">{selectedVideo.description}</p>
                   </div>

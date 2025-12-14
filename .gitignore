@@ -87,3 +87,7 @@ $RECYCLE.BIN/
 # Backup files
 *.bak
 *.backup
+
+# Uploaded video files (keep directory structure but exclude actual files)
+backend/uploads/videos/*
+!backend/uploads/videos/.gitkeep

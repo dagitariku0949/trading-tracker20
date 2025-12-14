@@ -1,7 +1,40 @@
 const express = require('express')
+const multer = require('multer')
+const path = require('path')
+const fs = require('fs')
 const router = express.Router()
-const ownerAuth = require('../middleware/ownerAuth')
 
+// Configure multer for video file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '../uploads/videos')
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true })
+    }
+    cb(null, uploadDir)
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename with timestamp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, 'video-' + uniqueSuffix + path.extname(file.originalname))
+  }
+})
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 500 * 1024 * 1024 // 500MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Check if file is a video
+    if (file.mimetype.startsWith('video/')) {
+      cb(null, true)
+    } else {
+      cb(new Error('Only video files are allowed!'), false)
+    }
+  }
+})
 // Database connection (using in-memory for now, but structured for easy PostgreSQL migration)
 class LearningDatabase {
   constructor() {
@@ -281,7 +314,37 @@ class LearningDatabase {
 
 const learningDb = new LearningDatabase()
 
-// Get all learning content (public)
+// Get all learning content (public) - Main endpoint the frontend expects
+router.get('/', async (req, res) => {
+  try {
+    const [courses, videos, liveStreams, resources] = await Promise.all([
+      learningDb.getAllCourses(),
+      learningDb.getAllVideos(),
+      learningDb.getAllStreams(),
+      learningDb.getAllResources()
+    ])
+
+    res.json({
+      success: true,
+      data: {
+        courses,
+        videos,
+        liveStreams,
+        resources
+      },
+      version: 'api-v1',
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    console.error('Error fetching learning content:', error)
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch learning content' 
+    })
+  }
+})
+
+// Get all learning content (public) - Alternative endpoint
 router.get('/content', async (req, res) => {
   try {
     const [courses, videos, liveStreams, resources] = await Promise.all([
@@ -337,8 +400,96 @@ router.get('/published', async (req, res) => {
   }
 })
 
-// Create new content (owner only)
-router.post('/content/:type', ownerAuth, async (req, res) => {
+// Video file upload endpoint
+router.post('/upload-video', upload.single('video'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No video file provided'
+      })
+    }
+
+    // Generate video URL for the uploaded file
+    const videoUrl = `/uploads/videos/${req.file.filename}`
+    
+    // Get video metadata from request body
+    const { title, description, duration, category, thumbnail } = req.body
+    
+    // Create video entry
+    const newVideo = {
+      title: title || req.file.originalname,
+      description: description || 'Uploaded video',
+      duration: duration || '0:00',
+      category: category || 'General',
+      thumbnail: thumbnail || '🎥',
+      video_url: videoUrl,
+      file_info: {
+        originalName: req.file.originalname,
+        filename: req.file.filename,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      }
+    }
+    
+    const createdVideo = await learningDb.createVideo(newVideo)
+    
+    res.status(201).json({
+      success: true,
+      data: createdVideo,
+      message: 'Video uploaded successfully'
+    })
+  } catch (error) {
+    console.error('Error uploading video:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload video: ' + error.message
+    })
+  }
+})
+
+// Create new content - Main endpoint the frontend expects
+router.post('/', async (req, res) => {
+  try {
+    const { type, content } = req.body
+    let newContent
+
+    switch (type) {
+      case 'course':
+        newContent = await learningDb.createCourse(content)
+        break
+      case 'video':
+        newContent = await learningDb.createVideo(content)
+        break
+      case 'stream':
+        newContent = await learningDb.createStream(content)
+        break
+      case 'resource':
+        newContent = await learningDb.createResource(content)
+        break
+      default:
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid content type'
+        })
+    }
+
+    res.status(201).json({
+      success: true,
+      data: newContent,
+      message: `${type} created successfully`
+    })
+  } catch (error) {
+    console.error(`Error creating ${req.body.type}:`, error)
+    res.status(500).json({ 
+      success: false, 
+      message: `Failed to create ${req.body.type}` 
+    })
+  }
+})
+
+// Create new content - Alternative endpoint
+router.post('/content/:type', async (req, res) => {
   try {
     const { type } = req.params
     let newContent
@@ -377,8 +528,55 @@ router.post('/content/:type', ownerAuth, async (req, res) => {
   }
 })
 
-// Update content (owner only)
-router.put('/content/:type/:id', ownerAuth, async (req, res) => {
+// Update content - Main endpoint the frontend expects
+router.put('/', async (req, res) => {
+  try {
+    const { type, id, updates } = req.body
+    let updatedContent
+
+    switch (type) {
+      case 'course':
+        updatedContent = await learningDb.updateCourse(id, updates)
+        break
+      case 'video':
+        updatedContent = await learningDb.updateVideo(id, updates)
+        break
+      case 'stream':
+        updatedContent = await learningDb.updateStream(id, updates)
+        break
+      case 'resource':
+        updatedContent = await learningDb.updateResource(id, updates)
+        break
+      default:
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid content type'
+        })
+    }
+
+    if (!updatedContent) {
+      return res.status(404).json({
+        success: false,
+        message: `${type} not found`
+      })
+    }
+
+    res.json({
+      success: true,
+      data: updatedContent,
+      message: `${type} updated successfully`
+    })
+  } catch (error) {
+    console.error(`Error updating ${req.body.type}:`, error)
+    res.status(500).json({ 
+      success: false, 
+      message: `Failed to update ${req.body.type}` 
+    })
+  }
+})
+
+// Update content - Alternative endpoint
+router.put('/content/:type/:id', async (req, res) => {
   try {
     const { type, id } = req.params
     let updatedContent
@@ -424,8 +622,54 @@ router.put('/content/:type/:id', ownerAuth, async (req, res) => {
   }
 })
 
-// Delete content (owner only)
-router.delete('/content/:type/:id', ownerAuth, async (req, res) => {
+// Delete content - Main endpoint the frontend expects
+router.delete('/', async (req, res) => {
+  try {
+    const { type, id } = req.query
+    let deleted
+
+    switch (type) {
+      case 'course':
+        deleted = await learningDb.deleteCourse(id)
+        break
+      case 'video':
+        deleted = await learningDb.deleteVideo(id)
+        break
+      case 'stream':
+        deleted = await learningDb.deleteStream(id)
+        break
+      case 'resource':
+        deleted = await learningDb.deleteResource(id)
+        break
+      default:
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid content type'
+        })
+    }
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: `${type} not found`
+      })
+    }
+
+    res.json({
+      success: true,
+      message: `${type} deleted successfully`
+    })
+  } catch (error) {
+    console.error(`Error deleting ${req.query.type}:`, error)
+    res.status(500).json({ 
+      success: false, 
+      message: `Failed to delete ${req.query.type}` 
+    })
+  }
+})
+
+// Delete content - Alternative endpoint
+router.delete('/content/:type/:id', async (req, res) => {
   try {
     const { type, id } = req.params
     let deleted

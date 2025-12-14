@@ -1,0 +1,11 @@
+{
+  "type": "video",
+  "content": {
+    "title": "Test Video: Admin Panel Demo",
+    "description": "This video demonstrates how the admin panel video upload works in real-time",
+    "duration": "5:30",
+    "category": "Technical Analysis",
+    "thumbnail": "🎬",
+    "video_url": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+  }
+}

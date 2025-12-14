@@ -30,8 +30,8 @@ body[data-show-admin="true"] button[title="Owner Admin Panel"] {
 }
 
 /* Hide any orange button that might be the owner button */
-.bg-orange-600:has-text("Owner"),
-.bg-orange-600:has-text("🔧") {
+.bg-orange-600[title*="Owner"],
+.bg-orange-600[title*="🔧"] {
   display: none !important;
 }
 
