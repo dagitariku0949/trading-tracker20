@@ -10,32 +10,57 @@
     <script>
         async function testAuthAPI() {
             const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing auth API...</p>';
             
             try {
                 // Test the debug endpoint
                 console.log('Testing debug endpoint...');
-                const debugResponse = await fetch('/api/auth/debug');
-                const debugData = await debugResponse.json();
+                results.innerHTML += '<h2>1. Testing Debug Endpoint (/api/auth/debug):</h2>';
                 
-                results.innerHTML += '<h2>Debug Endpoint:</h2>';
-                results.innerHTML += '<pre>' + JSON.stringify(debugData, null, 2) + '</pre>';
+                const debugResponse = await fetch('/api/auth/debug');
+                console.log('Debug response status:', debugResponse.status);
+                
+                if (debugResponse.ok) {
+                    const debugData = await debugResponse.json();
+                    results.innerHTML += '<pre style="background: #f0f0f0; padding: 10px;">' + JSON.stringify(debugData, null, 2) + '</pre>';
+                } else {
+                    results.innerHTML += '<p style="color: red;">Debug endpoint failed: ' + debugResponse.status + '</p>';
+                }
                 
                 // Test the users endpoint
                 console.log('Testing users endpoint...');
-                const usersResponse = await fetch('/api/auth/users');
-                const usersData = await usersResponse.json();
+                results.innerHTML += '<h2>2. Testing Users Endpoint (/api/auth/users):</h2>';
                 
-                results.innerHTML += '<h2>Users Endpoint:</h2>';
-                results.innerHTML += '<pre>' + JSON.stringify(usersData, null, 2) + '</pre>';
+                const usersResponse = await fetch('/api/auth/users');
+                console.log('Users response status:', usersResponse.status);
+                
+                if (usersResponse.ok) {
+                    const usersData = await usersResponse.json();
+                    results.innerHTML += '<p><strong>Users Count:</strong> ' + usersData.length + '</p>';
+                    results.innerHTML += '<pre style="background: #f0f0f0; padding: 10px;">' + JSON.stringify(usersData, null, 2) + '</pre>';
+                } else {
+                    results.innerHTML += '<p style="color: red;">Users endpoint failed: ' + usersResponse.status + '</p>';
+                }
+                
+                // Test a simple GET to see if auth API is working at all
+                results.innerHTML += '<h2>3. Testing Auth API Base:</h2>';
+                const baseResponse = await fetch('/api/auth');
+                results.innerHTML += '<p>Base auth response status: ' + baseResponse.status + '</p>';
                 
             } catch (error) {
                 results.innerHTML += '<h2>Error:</h2>';
-                results.innerHTML += '<pre>' + error.message + '</pre>';
+                results.innerHTML += '<pre style="color: red;">' + error.message + '</pre>';
+                console.error('Test error:', error);
             }
         }
         
         // Run test when page loads
         testAuthAPI();
+        
+        // Add a button to retest
+        setTimeout(() => {
+            document.body.innerHTML += '<br><button onclick="testAuthAPI()">Retest API</button>';
+        }, 1000);
     </script>
 </body>
 </html>

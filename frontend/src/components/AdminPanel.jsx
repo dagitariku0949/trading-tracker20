@@ -40,8 +40,18 @@ const AdminPanel = ({ onBackToDashboard, onLogout }) => {
       
       try {
         console.log('AdminPanel: Fetching users from /api/auth/users...');
+        
+        // Try direct fetch first to debug
+        const directResponse = await fetch('/api/auth/users');
+        console.log('AdminPanel: Direct fetch response:', directResponse.status, directResponse.ok);
+        if (directResponse.ok) {
+          const directData = await directResponse.json();
+          console.log('AdminPanel: Direct fetch data:', directData);
+        }
+        
+        // Now try with api client
         const usersResponse = await api.get('/api/auth/users');
-        console.log('AdminPanel: Users response:', usersResponse);
+        console.log('AdminPanel: API client response:', usersResponse);
         usersData = usersResponse.data || [];
         actualUserCount = usersData.length;
         console.log('AdminPanel: Received users:', usersData.length, usersData);
