@@ -15,7 +15,7 @@ import TradeJournal from '../components/TradeJournal'
 import AfterTradeForm from '../components/AfterTradeForm'
 import PositionCalculator from '../components/PositionCalculator'
 import LearningHub from '../components/LearningHubSimple'
-import AdminPanel from '../components/AdminPanel'
+// import AdminPanel from '../components/AdminPanel' // Removed for now
 
 
 export default function Dashboard(){
@@ -276,10 +276,18 @@ export default function Dashboard(){
 
   if (showAdmin) {
     return (
-      <AdminPanel 
-        onBackToDashboard={() => setShowAdmin(false)}
-        onLogout={handleUserLogout}
-      />
+      <div className="min-h-screen bg-slate-900 text-white p-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+          <p className="text-gray-400 mb-4">Admin functionality coming soon</p>
+          <button
+            onClick={() => setShowAdmin(false)}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
     )
   }
 
