@@ -19,11 +19,8 @@ import AdminPanel from '../components/AdminPanel'
 import AdminLogin from '../components/AdminLogin'
 
 
-export default function Dashboard(){
-  // Mock user for dashboard
-  const user = { name: 'Demo User', email: 'demo@example.com' };
-  const logout = () => {};
-  const [currentUser, setCurrentUser] = useState(null)
+export default function Dashboard({ user, onLogout }){
+  const [currentUser, setCurrentUser] = useState(user)
   const [showLearning, setShowLearning] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
@@ -45,12 +42,26 @@ export default function Dashboard(){
 
   const fetchData = async () => {
     try {
+      console.log('Fetching dashboard data...')
       const [tradesRes, metricsRes, statsRes, dailyRes] = await Promise.all([
         api.get('/api/trades'),
         api.get('/api/trades/stats/metrics'),
         api.get('/api/trades/stats/account'),
         api.get('/api/trades/stats/daily')
       ])
+      
+      console.log('Dashboard: Data fetched successfully:', {
+        trades: tradesRes.data.length,
+        metrics: metricsRes.data,
+        stats: statsRes.data
+      })
+      
+      // Debug: Log trade statuses
+      const statusCounts = tradesRes.data.reduce((acc, trade) => {
+        acc[trade.status] = (acc[trade.status] || 0) + 1;
+        return acc;
+      }, {});
+      console.log('Dashboard: Trade status counts:', statusCounts);
       
       setTrades(tradesRes.data)
       setMetrics(metricsRes.data)
@@ -75,11 +86,8 @@ export default function Dashboard(){
   }
 
   useEffect(() => {
-    // Set default user
-    const defaultUser = { name: 'Trader', email: 'trader@example.com' }
-    setCurrentUser(defaultUser)
-    localStorage.setItem('userToken', 'direct-access')
-    localStorage.setItem('userData', JSON.stringify(defaultUser))
+    // Set user from props
+    setCurrentUser(user)
     
     // Load starting balance from localStorage first
     const savedBalance = localStorage.getItem('startingBalance')
@@ -100,12 +108,23 @@ export default function Dashboard(){
     
     fetchData()
     setLoading(false)
+
+    // Listen for storage changes to sync data across components
+    const handleStorageChange = (e) => {
+      if (e.key === 'trades') {
+        console.log('Trades data changed, refreshing...')
+        fetchData()
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
 
   const handleUserLogout = () => {
-    // Clear data and refresh the page
-    localStorage.clear()
-    window.location.reload()
+    if (onLogout) {
+      onLogout()
+    }
   }
 
   useEffect(() => {
@@ -226,32 +245,56 @@ export default function Dashboard(){
 
   const handleTradeSubmit = async (tradeData) => {
     try {
+      console.log('Dashboard: Submitting trade data:', tradeData)
       let savedTrade
       if (editingTrade) {
-        await api.put(`/api/trades/${editingTrade.id}`, tradeData)
+        console.log('Dashboard: Updating existing trade:', editingTrade.id)
+        const response = await api.put(`/api/trades/${editingTrade.id}`, tradeData)
+        savedTrade = response.data
+        console.log('Dashboard: Trade updated:', savedTrade)
       } else {
+        console.log('Dashboard: Creating new trade')
         const response = await api.post('/api/trades', tradeData)
         savedTrade = response.data
+        console.log('Dashboard: Trade created successfully:', savedTrade)
         
         // Schedule reminder for new open trades
-        if (savedTrade.status === 'OPEN') {
-          const { scheduleTradeReminder } = await import('../utils/notifications')
-          scheduleTradeReminder(savedTrade.id, savedTrade.symbol)
+        if (savedTrade && savedTrade.status === 'OPEN') {
+          try {
+            const { scheduleTradeReminder } = await import('../utils/notifications')
+            scheduleTradeReminder(savedTrade.id, savedTrade.symbol)
+          } catch (notifError) {
+            console.log('Notification scheduling failed:', notifError)
+          }
         }
       }
+      
+      console.log('Dashboard: Refreshing data after trade submission...')
       await fetchData()
+      console.log('Dashboard: Data refreshed, closing form')
       setShowTradeForm(false)
       setEditingTrade(null)
+      
+      // Show success message
+      alert(`Trade ${editingTrade ? 'updated' : 'created'} successfully!`)
+      
     } catch (err) {
-      console.error('Error saving trade:', err)
-      alert('Error saving trade')
+      console.error('Dashboard: Error saving trade:', err)
+      console.error('Dashboard: Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
+      alert(`Error saving trade: ${err.message}`)
     }
   }
 
   const handleAfterTradeSubmit = async (tradeData, tradeId) => {
     try {
+      console.log('Submitting after trade:', tradeData, tradeId)
       if (tradeId) {
         // Update existing trade (closing it)
+        console.log('Closing existing trade:', tradeId)
         await api.put(`/api/trades/${tradeId}`, tradeData)
         
         // Cancel reminder when trade is closed
@@ -259,8 +302,10 @@ export default function Dashboard(){
         cancelTradeReminder(tradeId)
       } else {
         // Create new closed trade
+        console.log('Creating new closed trade')
         await api.post('/api/trades', tradeData)
       }
+      console.log('Refreshing data after after-trade submission...')
       await fetchData()
       setShowAfterTradeForm(false)
       setClosingTrade(null)
@@ -278,10 +323,20 @@ export default function Dashboard(){
   const handleDeleteTrade = async (id) => {
     if (!confirm('Delete this trade?')) return
     try {
-      await api.delete(`/api/trades/${id}`)
+      console.log('Dashboard: Deleting trade with ID:', id, 'Type:', typeof id)
+      const response = await api.delete(`/api/trades/${id}`)
+      console.log('Dashboard: Delete response:', response.data)
+      console.log('Dashboard: Refreshing data after trade deletion...')
       await fetchData()
+      alert('Trade deleted successfully!')
     } catch (err) {
-      console.error('Error deleting trade:', err)
+      console.error('Dashboard: Error deleting trade:', err)
+      console.error('Dashboard: Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
+      alert(`Error deleting trade: ${err.message}`)
     }
   }
 
@@ -437,14 +492,17 @@ export default function Dashboard(){
             📊 Analytics
           </button>
           <button
-            onClick={() => setActiveTab('journal')}
+            onClick={() => {
+              console.log('Dashboard: Journal button clicked, switching to journal tab');
+              setActiveTab('journal');
+            }}
             className={`px-6 py-3 font-semibold transition whitespace-nowrap ${
               activeTab === 'journal'
-                ? 'border-b-2 border-emerald-500 text-emerald-400'
+                ? 'border-b-2 border-emerald-500 text-emerald-400 bg-emerald-900/20'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            📝 Journal
+            📝 Journal {activeTab === 'journal' ? '✓' : ''}
           </button>
           <button
             onClick={() => setActiveTab('monthly')}
@@ -542,7 +600,47 @@ export default function Dashboard(){
         {activeTab === 'journal' && (
           <>
             {accountStats && <AccountSummary stats={{...accountStats, startingBalance}} />}
-            <TradeJournal trades={trades} onEdit={handleEditTrade} />
+            
+            {/* Simple test content to verify tab switching works */}
+            <div className="bg-slate-800/60 border border-slate-700 rounded-lg p-6 mt-6">
+              <h2 className="text-2xl font-bold mb-4">📝 Trade Journal</h2>
+              <div className="text-slate-300 mb-4">
+                Journal tab is working! You have {trades.length} trades.
+              </div>
+              
+              {trades.length === 0 ? (
+                <div className="text-center py-12 text-slate-500">
+                  <div className="text-6xl mb-4">📝</div>
+                  <div className="text-xl mb-2">No trades in your journal yet</div>
+                  <div className="text-sm">Create your first trade to start building your trading journal!</div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {trades.slice(0, 5).map(trade => (
+                    <div key={trade.id} className="bg-slate-700/50 p-4 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-bold text-lg">{trade.symbol}</span>
+                          <span className="ml-3 text-sm text-slate-400">
+                            {trade.type} - {trade.status}
+                          </span>
+                        </div>
+                        <div className={`font-bold ${
+                          (trade.pnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                        }`}>
+                          {trade.pnl ? `${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toFixed(2)}` : 'No P&L'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {trades.length > 5 && (
+                    <div className="text-center text-slate-400 text-sm">
+                      ... and {trades.length - 5} more trades
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </>
         )}
 

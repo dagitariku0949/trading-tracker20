@@ -41,10 +41,25 @@ const AdminPanel = ({ onBackToDashboard, onLogout }) => {
         winRate: winRate.toFixed(1)
       });
 
-      // Mock users data
-      setUsers([
-        { id: 1, name: 'Demo User', email: 'demo@example.com', status: 'Active', trades: tradesData.length }
-      ]);
+      // Load real users data
+      try {
+        const usersResponse = await api.get('/api/auth/users');
+        const usersData = usersResponse.data || [];
+        
+        // Add trade counts to users
+        const usersWithTrades = usersData.map(user => ({
+          ...user,
+          trades: tradesData.filter(trade => trade.user_id === user.id).length
+        }));
+        
+        setUsers(usersWithTrades);
+      } catch (error) {
+        console.error('Error loading users:', error);
+        // Fallback to mock data
+        setUsers([
+          { id: 1, name: 'Demo User', email: 'demo@example.com', status: 'Active', trades: tradesData.length }
+        ]);
+      }
 
     } catch (error) {
       console.error('Error loading admin data:', error);

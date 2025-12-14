@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Trades API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1e293b;
+            color: white;
+        }
+        .test-section {
+            background: #334155;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .success {
+            background: #059669;
+        }
+        .error {
+            background: #dc2626;
+        }
+        pre {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Trades API Test</h1>
+    
+    <div class="test-section">
+        <h2>API Endpoint Tests</h2>
+        <button onclick="testGetTrades()">GET /api/trades</button>
+        <button onclick="testCreateTrade()">POST /api/trades</button>
+        <button onclick="testCreateTradeFormFormat()">POST /api/trades (Form Format)</button>
+        <button onclick="testCreateOpenTrade()">Create OPEN Trade</button>
+        <button onclick="testCreateClosedTrade()">Create CLOSED Trade</button>
+        <button onclick="testGetMetrics()">GET /api/trades/stats/metrics</button>
+        <button onclick="testGetAccount()">GET /api/trades/stats/account</button>
+        <button onclick="clearResults()">Clear Results</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testGetTrades() {
+            try {
+                log('Testing GET /api/trades...');
+                const response = await fetch(`${API_BASE}/api/trades`);
+                const data = await response.json();
+                log(`✅ GET /api/trades: ${response.status}`, 'success');
+                log(`<pre>${JSON.stringify(data, null, 2)}</pre>`);
+            } catch (error) {
+                log(`❌ GET /api/trades failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateTrade() {
+            try {
+                log('Testing POST /api/trades...');
+                const tradeData = {
+                    symbol: 'EURUSD',
+                    type: 'BUY',
+                    direction: 'LONG',
+                    entry_price: 1.0850,
+                    exit_price: 1.0900,
+                    quantity: 1000,
+                    lot_size: 1.0,
+                    status: 'CLOSED',
+                    entry_date: new Date().toISOString().split('T')[0],
+                    exit_date: new Date().toISOString().split('T')[0],
+                    notes: 'Test trade from API test - ' + new Date().toLocaleTimeString(),
+                    weekly_tf: 80,
+                    daily_tf: 70,
+                    h4_tf: 60,
+                    h1_tf: 50,
+                    lower_tf: 40,
+                    total_confluence: 60
+                };
+                
+                log(`Sending data: <pre>${JSON.stringify(tradeData, null, 2)}</pre>`);
+                
+                const response = await fetch(`${API_BASE}/api/trades`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer direct-access'
+                    },
+                    body: JSON.stringify(tradeData)
+                });
+                
+                const data = await response.json();
+                log(`✅ POST /api/trades: ${response.status}`, 'success');
+                log(`Response: <pre>${JSON.stringify(data, null, 2)}</pre>`);
+            } catch (error) {
+                log(`❌ POST /api/trades failed: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        }
+
+        async function testGetMetrics() {
+            try {
+                log('Testing GET /api/trades/stats/metrics...');
+                const response = await fetch(`${API_BASE}/api/trades/stats/metrics`);
+                const data = await response.json();
+                log(`✅ GET /api/trades/stats/metrics: ${response.status}`, 'success');
+                log(`<pre>${JSON.stringify(data, null, 2)}</pre>`);
+            } catch (error) {
+                log(`❌ GET /api/trades/stats/metrics failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetAccount() {
+            try {
+                log('Testing GET /api/trades/stats/account...');
+                const response = await fetch(`${API_BASE}/api/trades/stats/account`);
+                const data = await response.json();
+                log(`✅ GET /api/trades/stats/account: ${response.status}`, 'success');
+                log(`<pre>${JSON.stringify(data, null, 2)}</pre>`);
+            } catch (error) {
+                log(`❌ GET /api/trades/stats/account failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateTradeFormFormat() {
+            try {
+                log('Testing POST /api/trades with TradeForm format...');
+                // This mimics exactly what TradeForm sends
+                const formData = {
+                    symbol: 'GBPUSD',
+                    direction: 'LONG',
+                    entry_price: '1.2650',
+                    exit_price: '',
+                    lot_size: '0.5',
+                    weekly_tf: 70,
+                    daily_tf: 80,
+                    h4_tf: 60,
+                    h1_tf: 50,
+                    lower_tf: 40,
+                    stop_loss: '',
+                    take_profit: '',
+                    risk_reward: '2.5',
+                    notes: 'Test from form format - ' + new Date().toLocaleTimeString(),
+                    screenshot: ''
+                };
+
+                // Transform to API format (like TradeForm does)
+                const apiData = {
+                    ...formData,
+                    type: formData.direction === 'LONG' ? 'BUY' : 'SELL',
+                    quantity: parseFloat(formData.lot_size) || 0,
+                    status: formData.exit_price ? 'CLOSED' : 'OPEN',
+                    entry_price: parseFloat(formData.entry_price) || 0,
+                    exit_price: formData.exit_price ? parseFloat(formData.exit_price) : null,
+                    entry_date: new Date().toISOString().split('T')[0],
+                    exit_date: formData.exit_price ? new Date().toISOString().split('T')[0] : null,
+                    total_confluence: Math.round((70 + 80 + 60 + 50 + 40) / 5)
+                };
+                
+                log(`Form data: <pre>${JSON.stringify(formData, null, 2)}</pre>`);
+                log(`API data: <pre>${JSON.stringify(apiData, null, 2)}</pre>`);
+                
+                const response = await fetch(`${API_BASE}/api/trades`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer direct-access'
+                    },
+                    body: JSON.stringify(apiData)
+                });
+                
+                const data = await response.json();
+                log(`✅ POST /api/trades (Form Format): ${response.status}`, 'success');
+                log(`Response: <pre>${JSON.stringify(data, null, 2)}</pre>`);
+            } catch (error) {
+                log(`❌ POST /api/trades (Form Format) failed: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        }
+
+        async function testCreateOpenTrade() {
+            try {
+                log('Testing CREATE OPEN Trade...');
+                const apiData = {
+                    symbol: 'EURUSD',
+                    type: 'BUY',
+                    direction: 'LONG',
+                    entry_price: 1.0850,
+                    exit_price: null,
+                    quantity: 1000,
+                    lot_size: 1.0,
+                    status: 'OPEN',
+                    entry_date: new Date().toISOString().split('T')[0],
+                    exit_date: null,
+                    notes: 'Test OPEN trade - ' + new Date().toLocaleTimeString(),
+                    weekly_tf: 80,
+                    daily_tf: 70,
+                    h4_tf: 60,
+                    h1_tf: 50,
+                    lower_tf: 40,
+                    total_confluence: 60
+                };
+                
+                const response = await fetch(`${API_BASE}/api/trades`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer direct-access'
+                    },
+                    body: JSON.stringify(apiData)
+                });
+                
+                const data = await response.json();
+                log(`✅ Created OPEN trade: ${response.status}`, 'success');
+                log(`Response: <pre>${JSON.stringify(data, null, 2)}</pre>`);
+            } catch (error) {
+                log(`❌ Create OPEN trade failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateClosedTrade() {
+            try {
+                log('Testing CREATE CLOSED Trade...');
+                const apiData = {
+                    symbol: 'GBPUSD',
+                    type: 'SELL',
+                    direction: 'SHORT',
+                    entry_price: 1.2650,
+                    exit_price: 1.2600,
+                    quantity: 500,
+                    lot_size: 0.5,
+                    status: 'CLOSED',
+                    entry_date: new Date().toISOString().split('T')[0],
+                    exit_date: new Date().toISOString().split('T')[0],
+                    notes: 'Test CLOSED trade - ' + new Date().toLocaleTimeString(),
+                    weekly_tf: 70,
+                    daily_tf: 80,
+                    h4_tf: 60,
+                    h1_tf: 50,
+                    lower_tf: 40,
+                    total_confluence: 60
+                };
+                
+                const response = await fetch(`${API_BASE}/api/trades`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer direct-access'
+                    },
+                    body: JSON.stringify(apiData)
+                });
+                
+                const data = await response.json();
+                log(`✅ Created CLOSED trade: ${response.status}`, 'success');
+                log(`Response: <pre>${JSON.stringify(data, null, 2)}</pre>`);
+            } catch (error) {
+                log(`❌ Create CLOSED trade failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run basic test on load
+        window.onload = function() {
+            log('🚀 API Test Page Loaded');
+            log('Click buttons above to test different endpoints');
+        };
+    </script>
+</body>
+</html>

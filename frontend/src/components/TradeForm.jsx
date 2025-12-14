@@ -7,6 +7,7 @@ export default function TradeForm({ trade, onSubmit, onClose }) {
     entry_price: '',
     exit_price: '',
     lot_size: '',
+    status: 'OPEN', // Add explicit status field
     weekly_tf: 0,
     daily_tf: 0,
     h4_tf: 0,
@@ -24,10 +25,13 @@ export default function TradeForm({ trade, onSubmit, onClose }) {
     if (trade) {
       setFormData({
         symbol: trade.symbol || '',
-        direction: trade.direction || 'LONG',
+        // Map API type back to direction for form display
+        direction: trade.type === 'SELL' ? 'SHORT' : 'LONG',
         entry_price: trade.entry_price || '',
         exit_price: trade.exit_price || '',
-        lot_size: trade.lot_size || '',
+        // Map API quantity back to lot_size for form display
+        lot_size: trade.quantity || trade.lot_size || '',
+        status: trade.status || 'OPEN', // Include status from trade
         weekly_tf: trade.weekly_tf || 0,
         daily_tf: trade.daily_tf || 0,
         h4_tf: trade.h4_tf || 0,
@@ -63,7 +67,28 @@ export default function TradeForm({ trade, onSubmit, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSubmit(formData)
+    
+    // Map form data to API format
+    const apiData = {
+      ...formData,
+      // Map direction to type for API compatibility
+      type: formData.direction === 'LONG' ? 'BUY' : 'SELL',
+      // Map lot_size to quantity for API compatibility
+      quantity: parseFloat(formData.lot_size) || 0,
+      // Use explicit status from form, but auto-set to CLOSED if exit_price is provided
+      status: formData.status || ((formData.exit_price && formData.exit_price.trim() !== '') ? 'CLOSED' : 'OPEN'),
+      // Ensure prices are numbers
+      entry_price: parseFloat(formData.entry_price) || 0,
+      exit_price: formData.exit_price ? parseFloat(formData.exit_price) : null,
+      // Add current date if not editing
+      entry_date: trade ? formData.entry_date : new Date().toISOString().split('T')[0],
+      exit_date: formData.exit_price ? (trade?.exit_date || new Date().toISOString().split('T')[0]) : null,
+      // Calculate total confluence
+      total_confluence: totalConfluence
+    }
+    
+    console.log('TradeForm submitting data:', apiData)
+    onSubmit(apiData)
   }
 
   const totalConfluence = Math.round(
@@ -143,6 +168,19 @@ export default function TradeForm({ trade, onSubmit, onClose }) {
                 required
                 className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 focus:outline-none focus:border-emerald-500"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1">Status</label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 focus:outline-none focus:border-emerald-500"
+              >
+                <option value="OPEN">OPEN</option>
+                <option value="CLOSED">CLOSED</option>
+              </select>
             </div>
 
             <div>

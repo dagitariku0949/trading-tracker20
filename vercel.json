@@ -7,12 +7,30 @@
   "functions": {
     "api/learning.js": {
       "runtime": "nodejs18.x"
+    },
+    "api/trades.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/auth.js": {
+      "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
     {
       "source": "/api/learning",
       "destination": "/api/learning.js"
+    },
+    {
+      "source": "/api/trades",
+      "destination": "/api/trades.js"
+    },
+    {
+      "source": "/api/trades/(.*)",
+      "destination": "/api/trades.js"
+    },
+    {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth.js"
     },
     {
       "source": "/admin-panel",
@@ -29,6 +47,10 @@
     {
       "source": "/api-test",
       "destination": "/api-test.html"
+    },
+    {
+      "source": "/test-trades-api",
+      "destination": "/test-trades-api.html"
     },
     {
       "source": "/(.*)",

@@ -1,19 +1,23 @@
 import React, { useState } from 'react'
 
 export default function TradeJournal({ trades, onEdit }) {
+  console.log('TradeJournal: Component rendered with', trades.length, 'trades');
+  
   const [filter, setFilter] = useState('ALL') // ALL, WINS, LOSSES
   const [selectedTrade, setSelectedTrade] = useState(null)
 
-  const closedTrades = trades.filter(t => t.status === 'CLOSED')
+  // Show all trades, not just closed ones
+  const allTrades = trades || [];
+  console.log('TradeJournal: Found', allTrades.length, 'total trades');
   
-  const filteredTrades = closedTrades.filter(trade => {
+  const filteredTrades = allTrades.filter(trade => {
     if (filter === 'WINS') return trade.pnl > 0
     if (filter === 'LOSSES') return trade.pnl < 0
     return true
   })
 
-  const wins = closedTrades.filter(t => t.pnl > 0)
-  const losses = closedTrades.filter(t => t.pnl < 0)
+  const wins = allTrades.filter(t => t.pnl > 0)
+  const losses = allTrades.filter(t => t.pnl < 0)
   const totalWinPnL = wins.reduce((sum, t) => sum + t.pnl, 0)
   const totalLossPnL = losses.reduce((sum, t) => sum + t.pnl, 0)
 
@@ -23,7 +27,7 @@ export default function TradeJournal({ trades, onEdit }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-slate-800/60 border border-slate-700 rounded-lg p-6">
           <div className="text-sm text-slate-400 mb-1">Total Trades</div>
-          <div className="text-3xl font-bold">{closedTrades.length}</div>
+          <div className="text-3xl font-bold">{allTrades.length}</div>
           <div className="text-sm text-slate-500 mt-1">
             {wins.length} wins, {losses.length} losses
           </div>
@@ -59,7 +63,7 @@ export default function TradeJournal({ trades, onEdit }) {
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
               }`}
             >
-              All ({closedTrades.length})
+              All ({allTrades.length})
             </button>
             <button
               onClick={() => setFilter('WINS')}
@@ -85,9 +89,15 @@ export default function TradeJournal({ trades, onEdit }) {
         </div>
 
         {/* Trade Cards */}
-        {filteredTrades.length === 0 ? (
+        {allTrades.length === 0 ? (
           <div className="text-center py-12 text-slate-500">
-            No {filter.toLowerCase()} trades yet.
+            <div className="text-6xl mb-4">📝</div>
+            <div className="text-xl mb-2">No trades in your journal yet</div>
+            <div className="text-sm">Create your first trade to start building your trading journal!</div>
+          </div>
+        ) : filteredTrades.length === 0 ? (
+          <div className="text-center py-12 text-slate-500">
+            No {filter.toLowerCase()} trades found.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -106,7 +116,7 @@ export default function TradeJournal({ trades, onEdit }) {
                   <div>
                     <div className="text-lg font-bold">{trade.symbol}</div>
                     <div className="text-xs text-slate-400">
-                      {new Date(trade.trade_date).toLocaleDateString()}
+                      {new Date(trade.exit_date || trade.entry_date).toLocaleDateString()}
                     </div>
                   </div>
                   <div className={`text-2xl font-bold ${trade.pnl > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -119,9 +129,9 @@ export default function TradeJournal({ trades, onEdit }) {
                   <div className="flex justify-between">
                     <span className="text-slate-400">Direction:</span>
                     <span className={`font-semibold ${
-                      trade.direction === 'LONG' ? 'text-emerald-400' : 'text-red-400'
+                      trade.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'
                     }`}>
-                      {trade.direction}
+                      {trade.type === 'BUY' ? 'LONG' : 'SHORT'}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -194,7 +204,7 @@ function TradeDetailModal({ trade, onClose, onEdit }) {
             <div>
               <h2 className="text-3xl font-bold">{trade.symbol}</h2>
               <div className="text-slate-400 mt-1">
-                {new Date(trade.trade_date).toLocaleString()}
+                {new Date(trade.exit_date || trade.entry_date).toLocaleString()}
               </div>
             </div>
             <div className="text-right">
@@ -215,9 +225,9 @@ function TradeDetailModal({ trade, onClose, onEdit }) {
             <div className="bg-slate-900/50 rounded-lg p-4">
               <div className="text-xs text-slate-400 mb-1">Direction</div>
               <div className={`text-lg font-bold ${
-                trade.direction === 'LONG' ? 'text-emerald-400' : 'text-red-400'
+                trade.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'
               }`}>
-                {trade.direction}
+                {trade.type === 'BUY' ? 'LONG' : 'SHORT'}
               </div>
             </div>
             <div className="bg-slate-900/50 rounded-lg p-4">
@@ -230,7 +240,7 @@ function TradeDetailModal({ trade, onClose, onEdit }) {
             </div>
             <div className="bg-slate-900/50 rounded-lg p-4">
               <div className="text-xs text-slate-400 mb-1">Lot Size</div>
-              <div className="text-lg font-bold">{trade.lot_size}</div>
+              <div className="text-lg font-bold">{trade.quantity || trade.lot_size}</div>
             </div>
           </div>
 

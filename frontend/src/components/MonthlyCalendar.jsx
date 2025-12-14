@@ -21,7 +21,8 @@ export default function MonthlyCalendar({ trades }) {
     const closedTrades = trades.filter(t => t.status === 'CLOSED')
     
     closedTrades.forEach(trade => {
-      const tradeDate = new Date(trade.trade_date)
+      // Use exit_date for closed trades, or entry_date as fallback
+      const tradeDate = new Date(trade.exit_date || trade.entry_date)
       if (tradeDate.getFullYear() === year && tradeDate.getMonth() === month) {
         const day = tradeDate.getDate()
         if (!dailyPnL[day]) {
