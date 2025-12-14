@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import api from '../api/client'
 import ConfluenceCard from '../components/ConfluenceCard'
 import CalendarHeatmap from '../components/CalendarHeatmap'
 import MetricsGrid from '../components/MetricsGrid'
@@ -14,7 +15,7 @@ import TradeJournal from '../components/TradeJournal'
 import AfterTradeForm from '../components/AfterTradeForm'
 import PositionCalculator from '../components/PositionCalculator'
 import LearningHub from '../components/LearningHubSimple'
-// No admin panel import needed
+import AdminPanel from '../components/AdminPanel'
 
 
 export default function Dashboard(){

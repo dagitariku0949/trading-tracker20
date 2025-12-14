@@ -1,5 +1,38 @@
 {
+  "version": 2,
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm install"
+  "installCommand": "cd frontend && npm install",
+  "framework": "vite",
+  "functions": {
+    "api/learning.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/learning",
+      "destination": "/api/learning.js"
+    },
+    {
+      "source": "/admin-panel",
+      "destination": "/admin-panel.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/learning-test",
+      "destination": "/learning-test.html"
+    },
+    {
+      "source": "/api-test",
+      "destination": "/api-test.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
